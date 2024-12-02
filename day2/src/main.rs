@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::fs;
 use std::time::Instant;
 
@@ -19,46 +18,64 @@ fn main() {
     println!("Part 2: {} (took {:.2?})", part2_result, duration_part2);
 }
 
-fn parse_input(input: &str) -> Vec<Vec<i32>> {
-    let parts: Vec<Vec<i32>> = input
-        .trim()
-        .split('\n')
-        .map(|s| s.split_whitespace().map(|s| s.parse().unwrap()).collect())
-        .collect();
+fn is_safe(report: &Vec<i32>) -> bool {
+    let sign = (report[0] - report[1]).signum();
 
-    (0..parts[0].len())
-        .map(|col| parts.iter().map(|row| row[col]).collect())
-        .collect()
+    for i in 0..report.len() - 1 {
+        let delta = report[i] - report[i + 1];
+
+        if delta.signum() != sign {
+            return false;
+        } else if !(1 <= delta.abs() && delta.abs() <= 3) {
+            return false;
+        }
+    }
+
+    true
 }
 
 fn solve_part1(input: &str) -> String {
-    let mut lists = parse_input(input);
+    let mut safe = 0;
 
-    lists[0].sort();
-    lists[1].sort();
+    for line in input.trim().lines() {
+        let numbers = line.split_whitespace()
+            .map(|number| number.parse::<i32>().unwrap())
+            .collect::<Vec<i32>>();
 
-    let differences: i32 = lists[0]
-        .iter()
-        .zip(lists[1].iter())
-        .map(|(x, y)| (x - y).abs())
-        .sum();
+        if is_safe(&numbers) {
+            safe += 1;
+        }
+    }
 
-    differences.to_string()
+    safe.to_string()
+}
+
+fn is_any_safe(report: &Vec<i32>) -> bool {
+    for i in 0..report.len() {
+        let result: Vec<_> = report[..i].iter().chain(&report[i+1..]).cloned().collect();
+
+        if is_safe(&result) {
+            return true;
+        }
+    }
+
+    false
 }
 
 fn solve_part2(input: &str) -> String {
-    let lists = parse_input(input);
+    let mut safe = 0;
 
-    let mut occurrences: HashMap<i32, i32> = HashMap::new();
+    for line in input.trim().lines() {
+        let numbers = line.split_whitespace()
+            .map(|number| number.parse::<i32>().unwrap())
+            .collect::<Vec<i32>>();
 
-    for &item in &lists[1] {
-        *occurrences.entry(item).or_insert(0) += 1;
+        if is_any_safe(&numbers) {
+            safe += 1;
+        }
     }
 
-    lists[0].iter()
-        .map(|x| x * *occurrences.get(x).unwrap_or(&0))
-        .sum::<i32>()
-        .to_string()
+    safe.to_string()
 }
 
 #[cfg(test)]
