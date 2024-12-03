@@ -35,15 +35,19 @@ impl Day for Day3 {
             for cap in re.captures_iter(line) {
                 let whole = cap.get(0).unwrap().as_str();
 
-                if whole == "do()" {
-                    enabled = true;
-                } else if  whole == "don't()" {
-                    enabled = false;
-                } else if enabled {
-                    let x = cap.get(1).unwrap().as_str().parse::<i32>().unwrap();
-                    let y = cap.get(2).unwrap().as_str().parse::<i32>().unwrap();
-
-                    total += x * y;
+                match whole {
+                    "do()" => {
+                        enabled = true;
+                    }
+                    "don't()" => {
+                        enabled = false;
+                    }
+                    _ if enabled => {
+                        let x = cap.get(1).unwrap().as_str().parse::<i32>().unwrap();
+                        let y = cap.get(2).unwrap().as_str().parse::<i32>().unwrap();
+                        total += x * y;
+                    }
+                    _ => {}
                 }
             }
         }
