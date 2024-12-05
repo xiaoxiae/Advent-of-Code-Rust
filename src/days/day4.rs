@@ -7,12 +7,12 @@ fn check_pattern(lines: &Vec<Vec<char>>, pattern: &str, x: i32, y: i32, dx: i32,
         let nx = x + dx * i as i32;
         let ny = y + dy * i as i32;
 
-        if nx < 0 || ny < 0 || nx as usize >= lines[0].len() || ny as usize >= lines.len() {
-            return false;
-        }
+        let char = lines.get(ny as usize).and_then(|row| row.get(nx as usize));
 
-        if lines[ny as usize][nx as usize] != c {
-            return false;
+        match char {
+            Some(&_c) if c == _c  => continue,
+            Some(_) => return false,
+            None => return false,
         }
     }
 
