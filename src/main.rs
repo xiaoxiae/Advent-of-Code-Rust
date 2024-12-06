@@ -1,6 +1,6 @@
 mod util;
 
-mod days { pub mod day1; pub mod day2; pub mod day3; pub mod day4; pub mod day5; }
+mod days { pub mod day1; pub mod day2; pub mod day3; pub mod day4; pub mod day5; pub mod day6; }
 
 use std::time::Instant;
 use crate::days::day1::Day1;
@@ -8,6 +8,7 @@ use crate::days::day2::Day2;
 use crate::days::day3::Day3;
 use crate::days::day4::Day4;
 use crate::days::day5::Day5;
+use crate::days::day6::Day6;
 use crate::util::Day;
 
 fn main() {
@@ -17,6 +18,7 @@ fn main() {
         Box::new(Day3),
         Box::new(Day4),
         Box::new(Day5),
+        Box::new(Day6),
     ];
 
     for (i, day) in days.iter().enumerate() {
@@ -78,6 +80,7 @@ mod tests {
             (Box::new(Day3), "day3"),
             (Box::new(Day4), "day4"),
             (Box::new(Day5), "day5"),
+            (Box::new(Day6), "day6"),
         ];
 
         for (day, day_name) in days {
