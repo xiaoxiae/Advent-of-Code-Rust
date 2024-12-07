@@ -3,6 +3,10 @@ use rayon::prelude::*;
 
 pub struct Day7;
 
+/// NOTE: we can take a different approach and go from the other side
+///  in that case, we can immediately filter out concat (result has to end in that),
+///  as well as multiplication (result has to be divisible by it)
+
 fn parse_equations(input: &str) -> Vec<(i64, Vec<i64>)> {
     input
         .trim()
