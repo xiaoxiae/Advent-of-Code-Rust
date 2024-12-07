@@ -1,26 +1,27 @@
 use crate::util::Day;
-use std::collections::{HashMap, HashSet};
+use rayon::prelude::*;
+use rustc_hash::{FxHashMap as HashMap, FxHashSet as HashSet };
 
 pub struct Day5;
 
 /// Construct a graph, given rules (=edges)
 fn get_graph(rules: &str) -> HashMap<i32, HashSet<i32>> {
-    let mut graph: HashMap<i32, HashSet<i32>> = HashMap::new();
+    let mut graph: HashMap<i32, HashSet<i32>> = HashMap::default();
     for rule in rules.split("\n") {
         let parts = rule.split("|").collect::<Vec<&str>>();
 
         let x = parts[0].parse::<i32>().unwrap();
         let y = parts[1].parse::<i32>().unwrap();
 
-        graph.entry(x).or_insert_with(HashSet::new).insert(y);
+        graph.entry(x).or_insert_with(HashSet::default).insert(y);
     }
 
     graph
 }
 
 /// Return updates, one by one, from the string input
-fn yield_updates(updates: &str) -> impl Iterator<Item = Vec<i32>> + '_ {
-    updates.trim().split('\n').map(|update| {
+fn yield_updates(updates: &str) -> impl ParallelIterator<Item = Vec<i32>> + '_ {
+    updates.trim().par_split('\n').map(|update| {
         update
             .split(",")
             .map(|x| x.parse::<i32>().unwrap())
@@ -73,12 +74,15 @@ impl Day for Day5 {
 
         let graph = get_graph(rules);
 
-        let mut sum = 0;
-        for update in yield_updates(updates) {
-            if check_update(&graph, &update) {
-                sum += update[update.len() / 2];
-            }
-        }
+        let sum: i32 = yield_updates(updates)
+            .filter_map(|update| {
+                if check_update(&graph, &update) {
+                    Some(update[update.len() / 2])
+                } else {
+                    None
+                }
+            })
+            .sum();
 
         sum.to_string()
     }
@@ -89,15 +93,16 @@ impl Day for Day5 {
 
         let graph = get_graph(rules);
 
-        let mut sum = 0;
-        for update in yield_updates(updates) {
-            if check_update(&graph, &update) {
-                continue;
-            }
-
-            let update = sort_update(&graph, &update);
-            sum += update[update.len() / 2];
-        }
+        let sum: i32 = yield_updates(updates)
+            .filter_map(|update| {
+                if check_update(&graph, &update) {
+                    None
+                } else {
+                    let sorted_update = sort_update(&graph, &update);
+                    Some(sorted_update[sorted_update.len() / 2])
+                }
+            })
+            .sum();
 
         sum.to_string()
     }
