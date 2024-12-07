@@ -7,6 +7,7 @@ mod days {
     pub mod day4;
     pub mod day5;
     pub mod day6;
+    pub mod day7;
 }
 
 use crate::days::day1::Day1;
@@ -15,6 +16,7 @@ use crate::days::day3::Day3;
 use crate::days::day4::Day4;
 use crate::days::day5::Day5;
 use crate::days::day6::Day6;
+use crate::days::day7::Day7;
 use crate::util::Day;
 use colored::Colorize;
 use serde::Serialize;
@@ -36,6 +38,7 @@ fn main() {
         Box::new(Day4),
         Box::new(Day5),
         Box::new(Day6),
+        Box::new(Day7),
     ];
 
     let mut timing_results = Vec::new();
@@ -126,6 +129,7 @@ mod tests {
             (Box::new(Day4), "day4"),
             (Box::new(Day5), "day5"),
             (Box::new(Day6), "day6"),
+            (Box::new(Day7), "day7"),
         ];
 
         for (day, day_name) in days {
