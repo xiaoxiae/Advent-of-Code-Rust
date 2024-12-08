@@ -22,14 +22,14 @@ use crate::days::day8::Day8;
 use crate::util::Day;
 use colored::Colorize;
 use serde::Serialize;
+use std::collections::HashMap;
 use std::io::Write;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 
 #[derive(Serialize)]
 struct TimingResult {
     day: usize,
-    part1_time: f64, // Duration in seconds
-    part2_time: f64, // Duration in seconds
+    times: HashMap<String, (String, f64)>,
 }
 
 fn main() {
@@ -52,36 +52,52 @@ fn main() {
         let input = std::fs::read_to_string(&input_file)
             .expect(&format!("Failed to read input file: {}", input_file));
 
+        let mut stars = 0;
+        let mut results = TimingResult {
+            day: 0,
+            times: Default::default(),
+        };
+
+        // TODO: can this be done nicer, i.e. by iterating over the functions?
+        for part in 1..=2 {
+            let start = Instant::now();
+
+            let result = if part == 1 {
+                day.solve_part1(&input)
+            } else {
+                day.solve_part2(&input)
+            };
+
+            let duration = start.elapsed();
+
+            match result {
+                Some(value) => {
+                    stars += 1;
+                    results.times.insert(part.to_string(), (value, duration.as_secs_f64()));
+                }
+                None => {}
+            }
+        }
+
         println!(
-            "{0} {1} {2}{2} {0}",
+            "{0} {1} {2} {0}",
             "---".bright_black(),
             format!("Day {}", day_number.to_string()).bold(),
-            "*".bright_yellow().bold(),
+            "*".repeat(stars).bright_yellow().bold(),
         );
 
-        let start = Instant::now();
-        let part1_result = day.solve_part1(&input);
-        let duration_part1 = start.elapsed();
-        println!(
-            "Part 1: {} (took {})",
-            part1_result.green(),
-            format!("{:.2?}", duration_part1).yellow()
-        );
+        for (part, (result, seconds)) in &results.times {
+            println!(
+                "Part {}: {} (took {})",
+                part.bold(),
+                result.green(),
+                format!("{:.2?}", Duration::from_secs_f64(*seconds)).yellow()
+            );
+        }
 
-        let start = Instant::now();
-        let part2_result = day.solve_part2(&input);
-        let duration_part2 = start.elapsed();
-        println!(
-            "Part 2: {} (took {})\n",
-            part2_result.green(),
-            format!("{:.2?}", duration_part2).yellow()
-        );
+        println!();
 
-        timing_results.push(TimingResult {
-            day: day_number,
-            part1_time: duration_part1.as_secs_f64(),
-            part2_time: duration_part2.as_secs_f64(),
-        });
+        timing_results.push(results);
     }
 
     let json_file = "timing_results.json";

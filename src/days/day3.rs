@@ -4,7 +4,7 @@ use crate::util::Day;
 pub struct Day3;
 
 impl Day for Day3 {
-    fn solve_part1(&self, input: &str) -> String {
+    fn solve_part1(&self, input: &str) -> Option<String> {
         let mut total = 0;
 
         for line in input.trim().lines() {
@@ -22,10 +22,10 @@ impl Day for Day3 {
                 .sum::<i32>();
         }
 
-        total.to_string()
+        Option::from(total.to_string())
     }
 
-    fn solve_part2(&self, input: &str) -> String {
+    fn solve_part2(&self, input: &str) -> Option<String> {
         let mut total = 0;
         let mut enabled = true;
 
@@ -52,6 +52,6 @@ impl Day for Day3 {
             }
         }
 
-        total.to_string()
+        Option::from(total.to_string())
     }
 }

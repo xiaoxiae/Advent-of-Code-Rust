@@ -20,7 +20,7 @@ fn check_pattern(lines: &Vec<Vec<char>>, pattern: &str, x: i32, y: i32, dx: i32,
 }
 
 impl Day for Day4 {
-    fn solve_part1(&self, input: &str) -> String {
+    fn solve_part1(&self, input: &str) -> Option<String> {
         let lines = input
             .trim()
             .lines()
@@ -45,10 +45,10 @@ impl Day for Day4 {
             }
         }
 
-        xmas_count.to_string()
+        Option::from(xmas_count.to_string())
     }
 
-    fn solve_part2(&self, input: &str) -> String {
+    fn solve_part2(&self, input: &str) -> Option<String> {
         let lines = input
             .trim()
             .lines()
@@ -81,6 +81,6 @@ impl Day for Day4 {
             }
         }
 
-        x_das_mas.to_string()
+        Option::from(x_das_mas.to_string())
     }
 }

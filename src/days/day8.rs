@@ -60,27 +60,27 @@ fn create_antinodes(
 }
 
 impl Day for Day8 {
-    fn solve_part1(&self, input: &str) -> String {
+    fn solve_part1(&self, input: &str) -> Option<String> {
         let (mut map, coordinates) = parse_input(input);
 
         create_antinodes(&mut map, &coordinates, 1, 1);
 
-        map.iter()
+        Option::from(map.iter()
             .flatten()
             .filter(|x| **x == '#')
             .count()
-            .to_string()
+            .to_string())
     }
 
-    fn solve_part2(&self, input: &str) -> String {
+    fn solve_part2(&self, input: &str) -> Option<String> {
         let (mut map, coordinates) = parse_input(input);
 
         create_antinodes(&mut map, &coordinates, 0, usize::MAX);
 
-        map.iter()
+        Option::from(map.iter()
             .flatten()
             .filter(|x| **x == '#')
             .count()
-            .to_string()
+            .to_string())
     }
 }

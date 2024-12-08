@@ -71,16 +71,16 @@ fn sum_equations(
 }
 
 impl Day for Day7 {
-    fn solve_part1(&self, input: &str) -> String {
+    fn solve_part1(&self, input: &str) -> Option<String> {
         let equations = parse_equations(&input);
 
         let operators: Vec<fn(i64, i64) -> Option<i64>> =
             vec![|a, b| a.checked_add(b), |a, b| a.checked_mul(b)];
 
-        sum_equations(&equations, &operators).to_string()
+        Option::from(sum_equations(&equations, &operators).to_string())
     }
 
-    fn solve_part2(&self, input: &str) -> String {
+    fn solve_part2(&self, input: &str) -> Option<String> {
         let equations = parse_equations(&input);
         let operators: Vec<fn(i64, i64) -> Option<i64>> =
             vec![|a, b| a.checked_add(b), |a, b| a.checked_mul(b), |a, b| {
@@ -93,6 +93,6 @@ impl Day for Day7 {
                 result
             }];
 
-        sum_equations(&equations, &operators).to_string()
+        Option::from(sum_equations(&equations, &operators).to_string())
     }
 }

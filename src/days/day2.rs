@@ -31,7 +31,7 @@ fn is_any_safe(report: &Vec<i32>) -> bool {
 }
 
 impl Day for Day2 {
-    fn solve_part1(&self, input: &str) -> String {
+    fn solve_part1(&self, input: &str) -> Option<String> {
         let mut safe = 0;
 
         for line in input.trim().lines() {
@@ -44,10 +44,10 @@ impl Day for Day2 {
             }
         }
 
-        safe.to_string()
+        Option::from(safe.to_string())
     }
 
-    fn solve_part2(&self, input: &str) -> String {
+    fn solve_part2(&self, input: &str) -> Option<String> {
         let mut safe = 0;
 
         for line in input.trim().lines() {
@@ -60,6 +60,6 @@ impl Day for Day2 {
             }
         }
 
-        safe.to_string()
+        Option::from(safe.to_string())
     }
 }

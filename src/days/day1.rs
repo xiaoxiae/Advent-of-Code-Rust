@@ -16,7 +16,7 @@ fn parse_input(input: &str) -> Vec<Vec<i32>> {
 }
 
 impl Day for Day1 {
-    fn solve_part1(&self, input: &str) -> String {
+    fn solve_part1(&self, input: &str) -> Option<String> {
         let mut lists = parse_input(input);
 
         lists[0].sort();
@@ -28,10 +28,10 @@ impl Day for Day1 {
             .map(|(x, y)| (x - y).abs())
             .sum();
 
-        differences.to_string()
+        Option::from(differences.to_string())
     }
 
-    fn solve_part2(&self, input: &str) -> String {
+    fn solve_part2(&self, input: &str) -> Option<String> {
         let lists = parse_input(input);
 
         let mut occurrences: HashMap<i32, i32> = HashMap::new();
@@ -40,9 +40,9 @@ impl Day for Day1 {
             *occurrences.entry(item).or_insert(0) += 1;
         }
 
-        lists[0].iter()
+        Option::from(lists[0].iter()
             .map(|x| x * *occurrences.get(x).unwrap_or(&0))
             .sum::<i32>()
-            .to_string()
+            .to_string())
     }
 }

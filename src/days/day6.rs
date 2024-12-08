@@ -74,7 +74,7 @@ fn move_forward(
 }
 
 impl Day for Day6 {
-    fn solve_part1(&self, input: &str) -> String {
+    fn solve_part1(&self, input: &str) -> Option<String> {
         let (mut map, mut start) = parse_map(input);
 
         let mut direction = 0;
@@ -91,14 +91,14 @@ impl Day for Day6 {
             }
         }
 
-        map.iter()
+        Option::from(map.iter()
             .flatten()
             .filter(|&&c| c == 'X')
             .count()
-            .to_string()
+            .to_string())
     }
 
-    fn solve_part2(&self, input: &str) -> String {
+    fn solve_part2(&self, input: &str) -> Option<String> {
         let (mut map, mut start) = parse_map(input);
 
         let initial_start = start.clone();
@@ -169,6 +169,6 @@ impl Day for Day6 {
             }
         });
 
-        valid_obstructions.load(Ordering::Relaxed).to_string()
+        Option::from(valid_obstructions.load(Ordering::Relaxed).to_string())
     }
 }

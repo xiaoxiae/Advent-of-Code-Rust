@@ -68,7 +68,7 @@ fn sort_update(graph: &HashMap<i32, HashSet<i32>>, update: &Vec<i32>) -> Vec<i32
 }
 
 impl Day for Day5 {
-    fn solve_part1(&self, input: &str) -> String {
+    fn solve_part1(&self, input: &str) -> Option<String> {
         let parts = input.trim().splitn(2, "\n\n").collect::<Vec<&str>>();
         let (rules, updates) = (parts[0], parts[1]);
 
@@ -84,10 +84,10 @@ impl Day for Day5 {
             })
             .sum();
 
-        sum.to_string()
+        Option::from(sum.to_string())
     }
 
-    fn solve_part2(&self, input: &str) -> String {
+    fn solve_part2(&self, input: &str) -> Option<String> {
         let parts = input.trim().splitn(2, "\n\n").collect::<Vec<&str>>();
         let (rules, updates) = (parts[0], parts[1]);
 
@@ -104,6 +104,6 @@ impl Day for Day5 {
             })
             .sum();
 
-        sum.to_string()
+        Option::from(sum.to_string())
     }
 }
