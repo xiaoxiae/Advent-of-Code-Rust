@@ -38,9 +38,9 @@ fn create_antinodes(
 
                 let (dx, dy) = (p1.0 as i32 - p2.0 as i32, p1.1 as i32 - p2.1 as i32);
 
-                let mut i = min_jumps as i32;
+                let mut i = min_jumps;
                 loop {
-                    let (x, y) = (p1.0 as i32 + i * dx, p1.1 as i32 + i * dy);
+                    let (x, y) = (p1.0 as i32 + (i as i32) * dx, p1.1 as i32 + (i as i32) * dy);
 
                     match map.get(y as usize).and_then(|row| row.get(x as usize)) {
                         Some(_) => {
@@ -50,7 +50,7 @@ fn create_antinodes(
                         _ => break,
                     }
 
-                    if i >= max_jumps as i32 {
+                    if i >= max_jumps {
                         break;
                     }
                 }
@@ -77,10 +77,12 @@ impl Day for Day8 {
 
         create_antinodes(&mut map, &coordinates, 0, usize::MAX);
 
-        Option::from(map.iter()
+        let result = Option::from(map.iter()
             .flatten()
             .filter(|x| **x == '#')
             .count()
-            .to_string())
+            .to_string());
+
+        result
     }
 }

@@ -9,6 +9,7 @@ mod days {
     pub mod day6;
     pub mod day7;
     pub mod day8;
+    pub mod day9;
 }
 
 use crate::days::day1::Day1;
@@ -19,6 +20,7 @@ use crate::days::day5::Day5;
 use crate::days::day6::Day6;
 use crate::days::day7::Day7;
 use crate::days::day8::Day8;
+use crate::days::day9::Day9;
 use crate::util::Day;
 use colored::Colorize;
 use serde::Serialize;
@@ -42,6 +44,7 @@ fn main() {
         Box::new(Day6),
         Box::new(Day7),
         Box::new(Day8),
+        Box::new(Day9),
     ];
 
     let mut timing_results = Vec::new();
@@ -59,13 +62,15 @@ fn main() {
         };
 
         // TODO: can this be done nicer, i.e. by iterating over the functions?
-        for part in 1..=2 {
+        for part in 1..=3 {
             let start = Instant::now();
 
             let result = if part == 1 {
                 day.solve_part1(&input)
-            } else {
+            } else if part == 2 {
                 day.solve_part2(&input)
+            } else {
+                day.solve_part3(&input)
             };
 
             let duration = start.elapsed();
@@ -73,7 +78,9 @@ fn main() {
             match result {
                 Some(value) => {
                     stars += 1;
-                    results.times.insert(part.to_string(), (value, duration.as_secs_f64()));
+                    results
+                        .times
+                        .insert(part.to_string(), (value, duration.as_secs_f64()));
                 }
                 None => {}
             }
@@ -86,13 +93,18 @@ fn main() {
             "*".repeat(stars).bright_yellow().bold(),
         );
 
-        for (part, (result, seconds)) in &results.times {
-            println!(
-                "Part {}: {} (took {})",
-                part.bold(),
-                result.green(),
-                format!("{:.2?}", Duration::from_secs_f64(*seconds)).yellow()
-            );
+        let mut sorted_keys: Vec<String> = results.times.keys().cloned().collect();
+        sorted_keys.sort();
+
+        for part in sorted_keys {
+            if let Some((result, seconds)) = results.times.get(&part) {
+                println!(
+                    "Part {}: {} (took {})",
+                    part.bold(),
+                    result.green(),
+                    format!("{:.2?}", Duration::from_secs_f64(*seconds)).yellow()
+                );
+            }
         }
 
         println!();
@@ -112,6 +124,7 @@ fn main() {
 mod tests {
     use super::*;
     use std::fs;
+    use std::option::Option;
 
     fn find_samples(dir: &str) -> Vec<(String, String)> {
         let mut samples = vec![];
@@ -150,6 +163,7 @@ mod tests {
             (Box::new(Day6), "day6"),
             (Box::new(Day7), "day7"),
             (Box::new(Day8), "day8"),
+            (Box::new(Day9), "day9"),
         ];
 
         for (day, day_name) in days {
@@ -168,9 +182,9 @@ mod tests {
                         .to_string(); // Convert to String
 
                     if part == "part1" {
-                        assert_eq!(day.solve_part1(&input), expected_output);
+                        assert_eq!(day.solve_part1(&input), Option::from(expected_output));
                     } else {
-                        assert_eq!(day.solve_part2(&input), expected_output);
+                        assert_eq!(day.solve_part2(&input), Option::from(expected_output));
                     }
                 }
             }

@@ -1,4 +1,6 @@
 use crate::util::Day;
+use itertools;
+use itertools::Itertools;
 
 pub struct Day2;
 
@@ -18,7 +20,7 @@ fn is_safe(report: &Vec<i32>) -> bool {
     true
 }
 
-fn is_any_safe(report: &Vec<i32>) -> bool {
+fn is_safe_with_error(report: &Vec<i32>) -> bool {
     for i in 0..report.len() {
         let result: Vec<_> = report[..i].iter().chain(&report[i+1..]).cloned().collect();
 
@@ -28,6 +30,25 @@ fn is_any_safe(report: &Vec<i32>) -> bool {
     }
 
     false
+}
+
+fn count_errors(report: &Vec<i32>) -> i32 {
+    let len = report.len();
+
+    let mut min_errors = i32::MAX;
+
+    for subset_size in 2..=len {
+        for subset in report.iter().cloned().combinations(subset_size) {
+            if is_safe(&subset) {
+                min_errors = i32::min(
+                    min_errors,
+                    (report.len() as i32 - subset.len() as i32).abs()
+                )
+            }
+        }
+    }
+
+    min_errors
 }
 
 impl Day for Day2 {
@@ -55,11 +76,28 @@ impl Day for Day2 {
                 .map(|number| number.parse::<i32>().unwrap())
                 .collect::<Vec<i32>>();
 
-            if is_any_safe(&numbers) {
+            if is_safe_with_error(&numbers) {
                 safe += 1;
             }
         }
 
         Option::from(safe.to_string())
+    }
+
+    /// --- Tom's Part 3 ---
+    /// Make sure all reports all safe by removing the minimum number of errors.
+    /// Return how many errors were removed.
+    fn solve_part3(&self, input: &str) -> Option<String> {
+        let mut errors = 0;
+
+        for line in input.trim().lines() {
+            let numbers = line.split_whitespace()
+                .map(|number| number.parse::<i32>().unwrap())
+                .collect::<Vec<i32>>();
+
+            errors += count_errors(&numbers);
+        }
+
+        Option::from(errors.to_string())
     }
 }
