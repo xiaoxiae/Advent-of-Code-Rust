@@ -11,6 +11,7 @@ mod days {
     pub mod day8;
     pub mod day9;
     pub mod day10;
+    pub mod day11;
 }
 
 use crate::days::day1::Day1;
@@ -23,6 +24,7 @@ use crate::days::day7::Day7;
 use crate::days::day8::Day8;
 use crate::days::day9::Day9;
 use crate::days::day10::Day10;
+use crate::days::day11::Day11;
 use crate::util::Day;
 use colored::Colorize;
 use serde::Serialize;
@@ -48,6 +50,7 @@ fn main() {
         Box::new(Day8),
         Box::new(Day9),
         Box::new(Day10),
+        Box::new(Day11),
     ];
 
     let mut timing_results = Vec::new();
@@ -132,20 +135,22 @@ mod tests {
     fn find_samples(dir: &str) -> Vec<(String, String)> {
         let mut samples = vec![];
 
-        for entry in fs::read_dir(dir).expect(&format!("Failed to read '{}' directory", dir)) {
-            if let Ok(entry) = entry {
-                let path = entry.path();
-                if let Some(file_name) = path.file_name().and_then(|s| s.to_str()) {
-                    if file_name.starts_with("sample") && file_name.ends_with(".in") {
-                        let base_name = &file_name[..file_name.len() - 3];
-                        let input_file = path.clone();
-                        let output_file = path.with_file_name(format!("{}.out", base_name));
+        if let Ok(entries) = fs::read_dir(dir) {
+            for entry in entries {
+                if let Ok(entry) = entry {
+                    let path = entry.path();
+                    if let Some(file_name) = path.file_name().and_then(|s| s.to_str()) {
+                        if file_name.starts_with("sample") && file_name.ends_with(".in") {
+                            let base_name = &file_name[..file_name.len() - 3];
+                            let input_file = path.clone();
+                            let output_file = path.with_file_name(format!("{}.out", base_name));
 
-                        if output_file.exists() {
-                            samples.push((
-                                input_file.to_str().unwrap().to_string(),
-                                output_file.to_str().unwrap().to_string(),
-                            ));
+                            if output_file.exists() {
+                                samples.push((
+                                    input_file.to_str().unwrap().to_string(),
+                                    output_file.to_str().unwrap().to_string(),
+                                ));
+                            }
                         }
                     }
                 }
@@ -168,6 +173,7 @@ mod tests {
             (Box::new(Day8), "day8"),
             (Box::new(Day9), "day9"),
             (Box::new(Day10), "day10"),
+            (Box::new(Day11), "day11"),
         ];
 
         for (day, day_name) in days {
