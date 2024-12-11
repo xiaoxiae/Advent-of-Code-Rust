@@ -1,5 +1,4 @@
 use rustc_hash::{FxHashMap as HashMap};
-use std::hash::Hash;
 use crate::util::Day;
 
 pub struct Day11;

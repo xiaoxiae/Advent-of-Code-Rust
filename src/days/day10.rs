@@ -5,8 +5,6 @@ pub struct Day10;
 
 fn walk_trail(map: &Vec<Vec<usize>>, x: usize, y: usize) -> usize {
     let mut queue = VecDeque::from([(x, y, 0)]);
-    let mut count = 0;
-
     let mut ends = HashSet::new();
 
     while !queue.is_empty() {
