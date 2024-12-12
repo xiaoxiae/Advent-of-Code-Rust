@@ -1,7 +1,7 @@
 use crate::util::Day;
 use std::collections::HashMap;
 
-pub struct Day1;
+pub struct Y24D1;
 
 fn parse_input(input: &str) -> Vec<Vec<i32>> {
     let parts: Vec<Vec<i32>> = input
@@ -15,7 +15,7 @@ fn parse_input(input: &str) -> Vec<Vec<i32>> {
         .collect()
 }
 
-impl Day for Day1 {
+impl Day for Y24D1 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let mut lists = parse_input(input);
 

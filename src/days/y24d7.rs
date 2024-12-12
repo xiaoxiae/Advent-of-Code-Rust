@@ -1,7 +1,7 @@
 use crate::util::Day;
 use rayon::prelude::*;
 
-pub struct Day7;
+pub struct Y24D7;
 
 /// NOTE: we can take a different approach and go from the other side
 ///  in that case, we can immediately filter out concat (result has to end in that),
@@ -70,7 +70,7 @@ fn sum_equations(
         .sum::<i64>()
 }
 
-impl Day for Day7 {
+impl Day for Y24D7 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let equations = parse_equations(&input);
 

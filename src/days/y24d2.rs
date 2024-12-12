@@ -2,7 +2,7 @@ use crate::util::Day;
 use itertools;
 use itertools::Itertools;
 
-pub struct Day2;
+pub struct Y24D2;
 
 fn is_safe(report: &Vec<i32>) -> bool {
     let sign = (report[0] - report[1]).signum();
@@ -51,7 +51,7 @@ fn count_errors(report: &Vec<i32>) -> i32 {
     min_errors
 }
 
-impl Day for Day2 {
+impl Day for Y24D2 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let mut safe = 0;
 

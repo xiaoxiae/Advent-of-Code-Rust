@@ -5,7 +5,7 @@ use std::cmp::Ordering;
 use std::collections::{BinaryHeap};
 use rustc_hash::{FxHashMap as HashMap};
 
-pub struct Day4;
+pub struct Y24D4;
 
 fn check_pattern(lines: &Vec<Vec<char>>, pattern: &str, x: i32, y: i32, dx: i32, dy: i32) -> bool {
     for (i, c) in pattern.chars().enumerate() {
@@ -84,7 +84,7 @@ impl PartialOrd for State {
     }
 }
 
-impl Day for Day4 {
+impl Day for Y24D4 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let lines = input
             .trim()

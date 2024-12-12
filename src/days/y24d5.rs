@@ -3,7 +3,7 @@ use itertools::Itertools;
 use rayon::prelude::*;
 use rustc_hash::{FxHashMap as HashMap, FxHashSet as HashSet};
 
-pub struct Day5;
+pub struct Y24D5;
 
 fn get_graph(edges: &Vec<(i32, i32)>) -> HashMap<i32, HashSet<i32>> {
     let mut graph: HashMap<i32, HashSet<i32>> = HashMap::default();
@@ -92,7 +92,7 @@ fn sort_update(graph: &HashMap<i32, HashSet<i32>>, update: &Vec<i32>) -> Vec<i32
     vec.iter().map(|&(key, _)| key).collect()
 }
 
-impl Day for Day5 {
+impl Day for Y24D5 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let parts = input.trim().splitn(2, "\n\n").collect::<Vec<&str>>();
         let (rules, updates) = (parts[0], parts[1]);

@@ -1,32 +1,57 @@
 mod util;
 
-mod days {
-    pub mod day1;
-    pub mod day2;
-    pub mod day3;
-    pub mod day4;
-    pub mod day5;
-    pub mod day6;
-    pub mod day7;
-    pub mod day8;
-    pub mod day9;
-    pub mod day10;
-    pub mod day11;
-    pub mod day12;
+macro_rules! define_days {
+    ($($day_snake:ident => $day_pascal:ident),*) => {
+        macro_rules! days {
+            ($action:ident) => {
+                $action!($($day_snake => $day_pascal),*);
+            };
+        }
+    };
 }
 
-use crate::days::day1::Day1;
-use crate::days::day2::Day2;
-use crate::days::day3::Day3;
-use crate::days::day4::Day4;
-use crate::days::day5::Day5;
-use crate::days::day6::Day6;
-use crate::days::day7::Day7;
-use crate::days::day8::Day8;
-use crate::days::day9::Day9;
-use crate::days::day10::Day10;
-use crate::days::day11::Day11;
-use crate::days::day12::Day12;
+macro_rules! declare_days {
+    ($($day_snake:ident => $day_pascal:ident),*) => {
+        mod days {
+            $(
+                pub mod $day_snake;
+            )*
+        }
+
+        use days::*;
+        $(
+            use crate::days::$day_snake::$day_pascal;
+        )*
+    };
+}
+
+macro_rules! get_days {
+    ($($day_snake:ident => $day_pascal:ident),*) => {
+        vec![
+            $(
+                (Box::new($day_pascal), stringify!($day_snake)),
+            )*
+        ];
+    };
+}
+
+define_days!(
+    y24d1 => Y24D1,
+    y24d2 => Y24D2,
+    y24d3 => Y24D3,
+    y24d4 => Y24D4,
+    y24d5 => Y24D5,
+    y24d6 => Y24D6,
+    y24d7 => Y24D7,
+    y24d8 => Y24D8,
+    y24d9 => Y24D9,
+    y24d10 => Y24D10,
+    y24d11 => Y24D11,
+    y24d12 => Y24D12
+);
+
+days!(declare_days);
+
 use crate::util::Day;
 use colored::Colorize;
 use serde::Serialize;
@@ -41,26 +66,13 @@ struct TimingResult {
 }
 
 fn main() {
-    let days: Vec<Box<dyn Day>> = vec![
-        Box::new(Day1),
-        Box::new(Day2),
-        Box::new(Day3),
-        Box::new(Day4),
-        Box::new(Day5),
-        Box::new(Day6),
-        Box::new(Day7),
-        Box::new(Day8),
-        Box::new(Day9),
-        Box::new(Day10),
-        Box::new(Day11),
-        Box::new(Day12),
-    ];
+    let days: Vec<(Box<dyn Day>, &str)> = days!(get_days);
 
     let mut timing_results = Vec::new();
 
-    for (i, day) in days.iter().enumerate() {
+    for (i, (day, day_name)) in days.iter().enumerate() {
         let day_number = i + 1;
-        let input_file = format!("data/day{}/input.in", day_number);
+        let input_file = format!("data/{}/input.in", day_name);
         let input = std::fs::read_to_string(&input_file)
             .expect(&format!("Failed to read input file: {}", input_file));
 
@@ -165,20 +177,7 @@ mod tests {
 
     #[test]
     fn test_all_days() {
-        let days: Vec<(Box<dyn Day>, &str)> = vec![
-            (Box::new(Day1), "day1"),
-            (Box::new(Day2), "day2"),
-            (Box::new(Day3), "day3"),
-            (Box::new(Day4), "day4"),
-            (Box::new(Day5), "day5"),
-            (Box::new(Day6), "day6"),
-            (Box::new(Day7), "day7"),
-            (Box::new(Day8), "day8"),
-            (Box::new(Day9), "day9"),
-            (Box::new(Day10), "day10"),
-            (Box::new(Day11), "day11"),
-            (Box::new(Day12), "day12"),
-        ];
+        let days: Vec<(Box<dyn Day>, &str)> = days!(get_days);
 
         for (day, day_name) in days {
             for part in ["part1", "part2"] {

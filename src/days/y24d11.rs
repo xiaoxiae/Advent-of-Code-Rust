@@ -1,7 +1,7 @@
 use crate::util::Day;
 use rustc_hash::FxHashMap as HashMap;
 
-pub struct Day11;
+pub struct Y24D11;
 
 /// A wrapper for caching stone results.
 fn _count_stone(stone: i64, iterations: i64, cache: &mut HashMap<(i64, i64), i64>) -> i64 {
@@ -36,7 +36,7 @@ fn count_stone(stone: i64, iterations: i64, cache: &mut HashMap<(i64, i64), i64>
     }
 }
 
-impl Day for Day11 {
+impl Day for Y24D11 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let stones = input
             .trim()
