@@ -37,6 +37,7 @@ fn parse_input(input: &str) -> Vec<Contraption> {
         .collect()
 }
 
+/// My second solution (first one was Dijkstra because I expected some state space search shenanigans)
 fn find_path_bruteforce(contraption: &Contraption, max_steps: usize) -> Option<usize> {
     let mut min = usize::MAX;
     for i in 0..max_steps {
@@ -59,6 +60,7 @@ fn find_path_bruteforce(contraption: &Contraption, max_steps: usize) -> Option<u
     }
 }
 
+/// Faster second solution, skipping over unnecessary checks
 fn find_path_faster(contraption: &Contraption) -> Option<usize> {
     let mut min = usize::MAX;
     let mut i = 0;
@@ -87,8 +89,6 @@ fn find_path_faster(contraption: &Contraption) -> Option<usize> {
         //
         // we can skip at least their difference, divided by the largest button_a value
         // the division essentially acts as if incrementing i has no difference on the overall result
-        //
-        // there is probably a less hacky way of doing this, but I'm not smart enough to do it
         if mx != my {
             i += usize::max(
                 (usize::max(mx, my) - usize::min(mx, my))
@@ -106,12 +106,51 @@ fn find_path_faster(contraption: &Contraption) -> Option<usize> {
     }
 }
 
+/// Math is OP
+fn find_path_math(contraption: &Contraption, max_steps: usize) -> Option<usize> {
+    // if we cast a ray from start (0, 0) with button presses A
+    // and one from the end (goal) with button presses B,
+    // they will either collide at one point, or not at all (in our case)
+    //
+    // the price is a red herring since it doesn't affect the calculation
+    //
+    // i [ax ay] + j [bx by] = [cx cy]
+    //
+    // i ax + j bx = cx
+    // i ay + j by = cy
+    //
+    // i ax + j by (ax / ay) = cy (ax / ay)
+    //        j by (ax / ay) - j bx = cy (ax / ay) - cx
+    //        j (by (ax / ay) - bx) = cy (ax / ay) - cx
+    //        j = (cy (ax / ay) - cx) / (by (ax / ay) - bx)
+    //
+    // i = (cx - j bx) / ax
+
+    let (ax, ay) = (contraption.button_a.0 as f64, contraption.button_a.1 as f64);
+    let (bx, by) = (contraption.button_b.0 as f64, contraption.button_b.1 as f64);
+    let (cx, cy) = (contraption.goal.0 as f64, contraption.goal.1 as f64);
+
+    let j = (cy * (ax / ay) - cx) / (by * (ax / ay) - bx);
+    let i = (cx - j * bx) / ax;
+
+    if i > max_steps as f64 || j > max_steps as f64 {
+        return None;
+    }
+
+    // NOTE: this is a bit finicky - both 1e-1 and 1e-4 give incorrect results!!!
+    if i > 0f64 && j > 0f64 && (i.round() - i).abs() < 1e-3 && (j.round() - j).abs() < 1e-3 {
+        return Some((i.round() as usize) * BUTTON_A_PRICE + (j.round() as usize) * BUTTON_B_PRICE);
+    }
+
+    None
+}
+
 impl Day for Y24D13 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         Option::from(
             parse_input(input)
-                .par_iter()
-                .map(|c| find_path_bruteforce(c, MAX_STEPS))
+                .iter()
+                .map(|c| find_path_math(c, MAX_STEPS))
                 .filter_map(|x| x)
                 .sum::<usize>()
                 .to_string(),
@@ -123,14 +162,17 @@ impl Day for Y24D13 {
             parse_input(input)
                 .par_iter()
                 .map(|c| {
-                    find_path_faster(&Contraption {
-                        button_a: c.button_a,
-                        button_b: c.button_b,
-                        goal: (
-                            c.goal.0 + OOPSIE_DOOPSIE_FUCKY_WUCKY,
-                            c.goal.1 + OOPSIE_DOOPSIE_FUCKY_WUCKY,
-                        ),
-                    })
+                    find_path_math(
+                        &Contraption {
+                            button_a: c.button_a,
+                            button_b: c.button_b,
+                            goal: (
+                                c.goal.0 + OOPSIE_DOOPSIE_FUCKY_WUCKY,
+                                c.goal.1 + OOPSIE_DOOPSIE_FUCKY_WUCKY,
+                            ),
+                        },
+                        usize::MAX,
+                    )
                 })
                 .filter_map(|x| x)
                 .sum::<usize>()
