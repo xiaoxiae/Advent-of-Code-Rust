@@ -18,7 +18,6 @@ macro_rules! declare_days {
             )*
         }
 
-        use days::*;
         $(
             use crate::days::$day_snake::$day_pascal;
         )*
@@ -31,7 +30,7 @@ macro_rules! get_days {
             $(
                 (Box::new($day_pascal), stringify!($day_snake)),
             )*
-        ];
+        ]
     };
 }
 
@@ -48,7 +47,8 @@ define_days!(
     y24d10 => Y24D10,
     y24d11 => Y24D11,
     y24d12 => Y24D12,
-    y24d13 => Y24D13
+    y24d13 => Y24D13,
+    y24d14 => Y24D14
 );
 
 days!(declare_days);

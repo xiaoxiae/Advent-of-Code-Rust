@@ -1,5 +1,4 @@
 use crate::util::Day;
-use itertools::Itertools;
 use rayon::prelude::*;
 use regex::Regex;
 
@@ -38,7 +37,7 @@ fn parse_input(input: &str) -> Vec<Contraption> {
 }
 
 /// My second solution (first one was Dijkstra because I expected some state space search shenanigans)
-fn find_path_bruteforce(contraption: &Contraption, max_steps: usize) -> Option<usize> {
+fn _find_path_bruteforce(contraption: &Contraption, max_steps: usize) -> Option<usize> {
     let mut min = usize::MAX;
     for i in 0..max_steps {
         let x = contraption.button_a.0 * i;
@@ -61,7 +60,7 @@ fn find_path_bruteforce(contraption: &Contraption, max_steps: usize) -> Option<u
 }
 
 /// Faster second solution, skipping over unnecessary checks
-fn find_path_faster(contraption: &Contraption) -> Option<usize> {
+fn _find_path_faster(contraption: &Contraption) -> Option<usize> {
     let mut min = usize::MAX;
     let mut i = 0;
 
