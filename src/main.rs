@@ -49,7 +49,8 @@ define_days!(
     y24d12 => Y24D12,
     y24d13 => Y24D13,
     y24d14 => Y24D14,
-    y24d15 => Y24D15
+    y24d15 => Y24D15,
+    y24d16 => Y24D16
 );
 
 days!(declare_days);
