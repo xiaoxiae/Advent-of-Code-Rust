@@ -50,13 +50,15 @@ define_days!(
     y24d13 => Y24D13,
     y24d14 => Y24D14,
     y24d15 => Y24D15,
-    y24d16 => Y24D16
+    y24d16 => Y24D16,
+    y24d17 => Y24D17
 );
 
 days!(declare_days);
 
 use crate::util::Day;
 use colored::Colorize;
+use regex::Regex;
 use serde::Serialize;
 use std::collections::HashMap;
 use std::io::Write;
@@ -68,10 +70,25 @@ struct TimingResult {
     times: HashMap<String, (String, f64)>,
 }
 
+fn parse_solution_date(input: &str) -> (u32, u32) {
+    let re = Regex::new(r"^y(\d+)d(\d+)$").unwrap();
+
+    if let Some(captures) = re.captures(input) {
+        let year = captures.get(1).unwrap().as_str().parse::<u32>().unwrap();
+        let day = captures.get(2).unwrap().as_str().parse::<u32>().unwrap();
+
+        return (year, day);
+    }
+
+    panic!("Invalid date string '{}'", input);
+}
+
 fn main() {
     let days: Vec<(Box<dyn Day>, &str)> = days!(get_days);
 
     let mut timing_results = Vec::new();
+
+    let mut last_year = 0;
 
     for (i, (day, day_name)) in days.iter().enumerate() {
         let day_number = i + 1;
@@ -108,6 +125,18 @@ fn main() {
                 }
                 None => {}
             }
+        }
+
+        let (year, day) = parse_solution_date(day_name);
+
+        if year != last_year {
+            println!(
+                "{0}\n{1}\n{0}\n",
+                "---====---".bright_black(),
+                format!("   20{}   ", year).bold(),
+            );
+
+            last_year = year;
         }
 
         println!(
