@@ -1,13 +1,12 @@
-use std::cmp::Ordering;
-use std::collections::{BinaryHeap, HashMap};
-use itertools::Itertools;
-use regex::Regex;
 use crate::util::Day;
+use regex::Regex;
+use std::collections::VecDeque;
 
 type Position = (usize, usize);
 type Distance = usize;
 
 type Bytes = Vec<Position>;
+type Map = Vec<Vec<bool>>;
 
 fn parse_input(input: &str) -> Bytes {
     let re = Regex::new(r"\d+").unwrap();
@@ -23,26 +22,26 @@ fn parse_input(input: &str) -> Bytes {
         .collect()
 }
 
-#[derive(Debug, Eq, PartialEq, Clone)]
+#[derive(Debug)]
 struct State {
     position: Position,
     distance: Distance,
 }
 
 impl State {
-    fn next_states(&self, bytes: &[Position], width: usize, height: usize) -> Vec<State> {
+    fn next_states(&self, map: &Map) -> Vec<State> {
         [(1, 0), (0, 1), (-1, 0), (0, -1)].iter().map(|(dx, dy)| {
             let (x, y) = self.position;
 
             let nx = x as isize + dx;
             let ny = y as isize + dy;
 
-            if !(0 <= nx && nx < width as isize) || !(0 <= ny && ny < height as isize) {
+            if !(0 <= ny && ny < map.len() as isize) || !(0 <= nx && nx < map[ny as usize].len() as isize) {
                 None
             } else {
                 let p: Position = (nx as usize, ny as usize);
 
-                if bytes.contains(&p) {
+                if map[p.1][p.0] {
                     None
                 } else {
                     Option::from(State {
@@ -56,52 +55,28 @@ impl State {
     }
 }
 
-impl Ord for State {
-    fn cmp(&self, other: &Self) -> Ordering {
-        other.distance.cmp(&self.distance) // reverse the order to make it a min-heap
-    }
-}
-
-impl PartialOrd for State {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.cmp(other))
-    }
-}
-
 fn solve(
-    bytes: &Bytes,
+    map: &Map,
     start: Position,
     end: Position,
-    fallen_bytes: usize,
 ) -> Option<Distance> {
-    let mut distances: HashMap<Position, Distance> = HashMap::new();
-    let mut heap = BinaryHeap::new();
+    let mut explored: Vec<Vec<bool>> = vec![vec![false; map[0].len()]; map.len()];
+    let mut heap = VecDeque::new();
 
-    let width = end.0 + 1;
-    let height = end.1 + 1;
+    explored[start.1][start.0] = true;
+    heap.push_back(State { position: start, distance: 0 });
 
-    heap.push(State {
-        position: start,
-        distance: 0,
-    });
-
-    distances.insert(start, 0);
-
-    while let Some(state) = heap.pop() {
+    while let Some(state) = heap.pop_front() {
         if state.position == end {
             return Option::from(state.distance);
         }
 
-        for next_state in state.next_states(&bytes[..fallen_bytes], width, height) {
-            // Skip processing if we have already found a shorter distance
-            let best_distance = *distances
-                .get(&next_state.position)
-                .unwrap_or(&usize::MAX);
-
+        for next_state in state.next_states(&map) {
+            let &(x, y) = &next_state.position;
             // New/improved
-            if next_state.distance < best_distance {
-                distances.insert(next_state.position, next_state.distance);
-                heap.push(next_state);
+            if !explored[y][x] {
+                explored[y][x] = true;
+                heap.push_back(next_state);
             }
         }
     }
@@ -115,24 +90,17 @@ impl Day for Y24D18 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let bytes = parse_input(input);
 
-        let width: usize;
-        let height: usize;
-        let fallen_bytes: usize;
-        if bytes.len() <= 128 {  // for test inputs;
-            width = 7;
-            height = 7;
-            fallen_bytes = 12;
-        } else {
-            width = 71;
-            height = 71;
-            fallen_bytes = 1_024;
+        // (128 is arbitrarily set for testing instances)
+        let (width, height, fallen_bytes) = if bytes.len() <= 128 { (7, 7, 12) } else { (71, 71, 1024) };
+
+        let mut map: Vec<Vec<bool>> = vec![vec![false; width]; height];
+
+        for fallen_byte in 0..fallen_bytes {
+            let (x, y) = bytes[fallen_byte];
+            map[y][x] = true;
         }
 
-        let distance = solve(&bytes,
-                             (0, 0),
-                             (width - 1, height - 1),
-                             fallen_bytes,
-        );
+        let distance = solve(&map, (0, 0), (width - 1, height - 1));
 
         Option::from(distance.expect("No path found!").to_string())
     }
@@ -140,25 +108,32 @@ impl Day for Y24D18 {
     fn solve_part2(&self, input: &str) -> Option<String> {
         let bytes = parse_input(input);
 
-        let width: usize;
-        let height: usize;
-        if bytes.len() <= 128 {  // for test inputs;
-            width = 7;
-            height = 7;
-        } else {
-            width = 71;
-            height = 71;
-        }
+        // (128 is arbitrarily set for testing instances)
+        let (width, height) = if bytes.len() <= 128 { (7, 7) } else { (71, 71) };
 
-        println!("{} {}");
+        let mut lo = 0;
+        let mut hi = bytes.len();
 
-        for fallen_bytes in 1..bytes.len() {
-            if let None = solve(&bytes, (0, 0), (width - 1, height - 1), fallen_bytes) {
+        while lo < hi {
+            let mut map: Vec<Vec<bool>> = vec![vec![false; width]; height];
+            let mid = (lo + hi) / 2;
 
-                return Option::from(format!("{},{}", bytes[fallen_bytes - 1].0, bytes[fallen_bytes - 1].1).to_string());
+            for fallen_byte in 0..=mid {
+                let (x, y) = bytes[fallen_byte];
+                map[y][x] = true;
+            }
+
+            match solve(&map, (0, 0), (width - 1, height - 1)) {
+                Some(_) => lo = mid + 1,
+                None => hi = mid,
             }
         }
 
-        panic!("Path is never fully blocked!");
+        if lo == bytes.len() {
+            panic!("Path is never blocked!")
+        }
+
+        let (x, y) = bytes[lo];
+        return Option::from(format!("{},{}", x, y).to_string());
     }
 }
