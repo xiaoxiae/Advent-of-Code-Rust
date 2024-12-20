@@ -61,12 +61,12 @@ fn solve(
     end: Position,
 ) -> Option<Distance> {
     let mut explored: Vec<Vec<bool>> = vec![vec![false; map[0].len()]; map.len()];
-    let mut heap = VecDeque::new();
+    let mut queue = VecDeque::new();
 
     explored[start.1][start.0] = true;
-    heap.push_back(State { position: start, distance: 0 });
+    queue.push_back(State { position: start, distance: 0 });
 
-    while let Some(state) = heap.pop_front() {
+    while let Some(state) = queue.pop_front() {
         if state.position == end {
             return Option::from(state.distance);
         }
@@ -76,7 +76,7 @@ fn solve(
             // New/improved
             if !explored[y][x] {
                 explored[y][x] = true;
-                heap.push_back(next_state);
+                queue.push_back(next_state);
             }
         }
     }

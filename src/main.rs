@@ -71,14 +71,15 @@ use std::time::{Duration, Instant};
 struct TimingResult {
     day: usize,
     times: HashMap<String, (String, f64)>,
+    year: usize,
 }
 
-fn parse_solution_date(input: &str) -> (u32, u32) {
+fn parse_solution_date(input: &str) -> (usize, usize) {
     let re = Regex::new(r"^y(\d+)d(\d+)$").unwrap();
 
     if let Some(captures) = re.captures(input) {
-        let year = captures.get(1).unwrap().as_str().parse::<u32>().unwrap();
-        let day = captures.get(2).unwrap().as_str().parse::<u32>().unwrap();
+        let year = captures.get(1).unwrap().as_str().parse().unwrap();
+        let day = captures.get(2).unwrap().as_str().parse().unwrap();
 
         return (year, day);
     }
@@ -93,15 +94,17 @@ fn main() {
 
     let mut last_year = 0;
 
-    for (i, (day, day_name)) in days.iter().enumerate() {
-        let day_number = i + 1;
+    for (i, (day_object, day_name)) in days.iter().enumerate() {
+        let (year, day) = parse_solution_date(day_name);
+
         let input_file = format!("data/{}/input.in", day_name);
         let input = std::fs::read_to_string(&input_file)
             .expect(&format!("Failed to read input file: {}", input_file));
 
         let mut stars = 0;
         let mut results = TimingResult {
-            day: 0,
+            day: day,
+            year: year,
             times: Default::default(),
         };
 
@@ -110,11 +113,11 @@ fn main() {
             let start = Instant::now();
 
             let result = if part == 1 {
-                day.solve_part1(&input)
+                day_object.solve_part1(&input)
             } else if part == 2 {
-                day.solve_part2(&input)
+                day_object.solve_part2(&input)
             } else {
-                day.solve_part3(&input)
+                day_object.solve_part3(&input)
             };
 
             let duration = start.elapsed();
@@ -130,8 +133,6 @@ fn main() {
             }
         }
 
-        let (year, day) = parse_solution_date(day_name);
-
         if year != last_year {
             println!(
                 "{0}\n{1}\n{0}\n",
@@ -145,7 +146,7 @@ fn main() {
         println!(
             "{0} {1} {2} {0}",
             "---".bright_black(),
-            format!("Day {}", day_number.to_string()).bold(),
+            format!("Day {}", day).bold(),
             "*".repeat(stars).bright_yellow().bold(),
         );
 
