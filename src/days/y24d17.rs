@@ -1,7 +1,7 @@
 use crate::util::Day;
 use itertools::Itertools;
 use regex::Regex;
-use rand::Rng;
+use rand::{rng, Rng};
 use rayon::prelude::*;
 
 type Registers = Vec<usize>;
@@ -96,13 +96,13 @@ fn recursive(value: usize, power: usize, instructions: &Instructions) -> Option<
 }
 
 /// Flip a random bit
-fn mutate(value: usize, bits: usize) -> usize {
-    let bit_to_flip = rand::thread_rng().gen_range(0..bits);
+fn _mutate(value: usize, bits: usize) -> usize {
+    let bit_to_flip = rng().random_range(0..bits);
     value ^ (1 << bit_to_flip)
 }
 
 /// Fitness of an individual is how many places it matches with instructions
-fn fitness(value: usize, instructions: &Instructions) -> usize {
+fn _fitness(value: usize, instructions: &Instructions) -> usize {
     let mut registers = vec![value, 0, 0];
     let out = run(&mut registers, &instructions);
 
@@ -112,7 +112,7 @@ fn fitness(value: usize, instructions: &Instructions) -> usize {
 }
 
 /// A genetic solution that randomly flips bits of the register A until we get a quine
-fn genetic(instructions: &Instructions) -> Option<usize> {
+fn _genetic(instructions: &Instructions) -> Option<usize> {
     const PATIENCE: usize = 3_200;  // how many generations without improvement we wait
     const POOL_SIZE: usize = 1_024;  // generation size
 
@@ -123,7 +123,7 @@ fn genetic(instructions: &Instructions) -> Option<usize> {
     loop {
         // calculate fitness
         let mut values: Vec<(usize, usize)> = pool.par_iter()
-            .map(|v| (fitness(*v, instructions), *v))
+            .map(|v| (_fitness(*v, instructions), *v))
             .collect::<Vec<_>>();
 
         values.sort_by_key(|v| v.0);
@@ -140,7 +140,7 @@ fn genetic(instructions: &Instructions) -> Option<usize> {
             .collect::<Vec<usize>>();
 
         offspring = offspring[offspring.len() / 2..].to_owned()
-            .iter().flat_map(|&v| [mutate(v, instructions.len() * 3), mutate(v, instructions.len() * 3)])
+            .iter().flat_map(|&v| [_mutate(v, instructions.len() * 3), _mutate(v, instructions.len() * 3)])
             .collect::<Vec<usize>>();
 
         pool = offspring;
@@ -174,7 +174,7 @@ impl Day for Y24D17 {
 
         // I was bored, so I also solved it with a genetic algorithm
         //
-        // let a = genetic(&instructions)
+        // let a = _genetic(&instructions)
         //     .expect("No A value found!");
 
         let a = recursive(0, instructions.len() - 1, &instructions)

@@ -94,7 +94,7 @@ fn main() {
 
     let mut last_year = 0;
 
-    for (i, (day_object, day_name)) in days.iter().enumerate() {
+    for  (day_object, day_name) in days.iter() {
         let (year, day) = parse_solution_date(day_name);
 
         let input_file = format!("data/{}/input.in", day_name);
@@ -219,8 +219,6 @@ mod tests {
             for part in ["part1", "part2"] {
                 let samples = find_samples(format!("data/{}/{}", day_name, part).as_str());
 
-                println!("Testing {}/{}", day_name, part);
-
                 for (input_file, output_file) in &samples {
                     let input = fs::read_to_string(input_file)
                         .expect(&format!("Failed to read input file: {}", input_file));
@@ -231,9 +229,15 @@ mod tests {
                         .to_string(); // Convert to String
 
                     if part == "part1" {
-                        assert_eq!(day.solve_part1(&input), Option::from(expected_output));
+                        assert_eq!(
+                            day.solve_part1(&input), Option::from(expected_output),
+                            "{}, {} failed", day_name, part,
+                        );
                     } else {
-                        assert_eq!(day.solve_part2(&input), Option::from(expected_output));
+                        assert_eq!(
+                            day.solve_part2(&input), Option::from(expected_output),
+                            "{}, {} failed", day_name, part,
+                        );
                     }
                 }
             }

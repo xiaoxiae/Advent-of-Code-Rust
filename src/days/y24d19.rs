@@ -1,5 +1,4 @@
 use crate::util::Day;
-use itertools::Itertools;
 use rayon::prelude::*;
 use regex::Regex;
 use std::collections::HashMap;
@@ -115,7 +114,7 @@ impl Day for Y24D19 {
     fn solve_part2(&self, input: &str) -> Option<String> {
         let (stripes, patterns) = parse_input(input);
 
-        let mut trie = Trie::from(stripes);
+        let trie = Trie::from(stripes);
 
         let count: usize = patterns
             .par_iter()
