@@ -1,50 +1,49 @@
 use crate::util::Day;
 use std::collections::HashMap;
+use itertools::Itertools;
 
 pub struct Y24D1;
 
-fn parse_input(input: &str) -> Vec<Vec<i32>> {
-    let parts: Vec<Vec<i32>> = input
+fn parse_input(input: &str) -> (Vec<u32>, Vec<u32>) {
+    input
         .trim()
-        .split('\n')
-        .map(|s| s.split_whitespace().map(|s| s.parse().unwrap()).collect())
-        .collect();
-
-    (0..parts[0].len())
-        .map(|col| parts.iter().map(|row| row[col]).collect())
-        .collect()
+        .split_whitespace()
+        .map(|n| n.parse::<u32>().unwrap())
+        .chunks(2)
+        .into_iter().map(|c| c.collect_tuple::<(u32, u32)>().unwrap())
+        .unzip()
 }
 
 impl Day for Y24D1 {
     fn solve_part1(&self, input: &str) -> Option<String> {
-        let mut lists = parse_input(input);
+        let (mut l, mut r) = parse_input(input);
 
-        lists[0].sort();
-        lists[1].sort();
+        l.sort_unstable();
+        r.sort_unstable();
 
-        let differences: i32 = lists[0]
+        let differences: u32 = l
             .iter()
-            .zip(lists[1].iter())
-            .map(|(x, y)| (x - y).abs())
+            .zip(r.iter())
+            .map(|(x, y)| x.abs_diff(*y))
             .sum();
 
         Option::from(differences.to_string())
     }
 
     fn solve_part2(&self, input: &str) -> Option<String> {
-        let lists = parse_input(input);
+        let (l, r) = parse_input(input);
 
-        let mut occurrences: HashMap<i32, i32> = HashMap::new();
+        let mut occurrences: HashMap<u32, u32> = HashMap::new();
 
-        for &item in &lists[1] {
+        for &item in &r {
             *occurrences.entry(item).or_insert(0) += 1;
         }
 
         Option::from(
-            lists[0]
+            l
                 .iter()
                 .map(|x| x * *occurrences.get(x).unwrap_or(&0))
-                .sum::<i32>()
+                .sum::<u32>()
                 .to_string(),
         )
     }
@@ -55,13 +54,13 @@ impl Day for Y24D1 {
     fn solve_part3(&self, input: &str) -> Option<String> {
         let lists = parse_input(input);
 
-        let mut occurrences: Vec<HashMap<i32, Vec<usize>>> = Vec::new();
+        let mut occurrences: Vec<HashMap<u32, Vec<u32>>> = Vec::new();
 
-        for list in lists.iter() {
+        for list in [lists.0, lists.1] {
             let mut o = HashMap::new();
 
             for (i, &item) in list.iter().enumerate() {
-                o.entry(item).or_insert(Vec::new()).push(i);
+                o.entry(item).or_insert(Vec::new()).push(i as u32);
             }
 
             occurrences.push(o);
@@ -78,15 +77,15 @@ impl Day for Y24D1 {
             let mut index_lists = vec![i1, i2];
             index_lists.sort_by(|a, b| a.len().cmp(&b.len()));
 
-            let mut min_distance = i32::MAX;
+            let mut min_distance = u32::MAX;
             for offset in 0..(index_lists[1].len() - index_lists[0].len() + 1) {
-                let distance: i32 = index_lists[0]
+                let distance: u32 = index_lists[0]
                     .iter()
                     .zip(&index_lists[1][offset..index_lists[0].len() + offset])
-                    .map(|(&a, &b)| (a as i32 - b as i32).abs())
+                    .map(|(&a, &b)| a.abs_diff(b))
                     .sum();
 
-                min_distance = i32::min(distance, min_distance);
+                min_distance = u32::min(distance, min_distance);
             }
 
             distances += min_distance;
