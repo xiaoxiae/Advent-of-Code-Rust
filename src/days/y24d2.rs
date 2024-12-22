@@ -91,7 +91,8 @@ impl Day for Y24D2 {
         let mut errors = 0;
 
         for line in input.trim().lines() {
-            let numbers = line.split_whitespace()
+            let numbers = line
+                .split_whitespace()
                 .map(|number| number.parse::<i32>().unwrap())
                 .collect::<Vec<i32>>();
 
