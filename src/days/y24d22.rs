@@ -8,7 +8,6 @@ pub struct Y24D22;
 
 static MOD: usize = 16_777_216;
 static STEPS: usize = 2_000;
-static SEQUENCE_SIZE: usize = 4;
 
 fn evolve(number: usize) -> usize {
     let number = (number ^ (number * 64)) % MOD;

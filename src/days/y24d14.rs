@@ -106,13 +106,13 @@ impl Day for Y24D14 {
     }
 
     fn solve_part2(&self, input: &str) -> Option<String> {
-        let mut bots = parse_input(input);
+        let bots = parse_input(input);
 
         const BATCH_SIZE: usize = 512;
 
         let mut iteration = 0;
         let mut min_variance = i64::MAX;
-        let mut min_steps = 0;
+        let mut min_steps;
 
         loop {
             let batch: Vec<_> = (0..BATCH_SIZE)
@@ -135,6 +135,7 @@ impl Day for Y24D14 {
             let min_batch_variance = *batch.iter().min().unwrap();
 
             if min_batch_variance < min_variance {
+                min_variance = min_batch_variance;
                 min_steps = iteration * BATCH_SIZE
                     + batch.iter().position(|&x| x == min_batch_variance).unwrap();
 
@@ -143,8 +144,6 @@ impl Day for Y24D14 {
                 if iteration != 0 && (min_batch_variance as f64) < (min_variance as f64) * 1.25 {
                     break;
                 }
-
-                min_variance = min_batch_variance;
             }
 
             iteration += 1;
