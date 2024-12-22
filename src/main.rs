@@ -89,12 +89,22 @@ fn parse_solution_date(input: &str) -> (usize, usize) {
     panic!("Invalid date string '{}'", input);
 }
 
+/// Gets the actual length of a string by stripping the ANSI escape codes.
+fn get_length_without_colors(input: &str) -> usize {
+    let ansi_regex = Regex::new(r"\x1b\[[0-9;]*m").unwrap();
+    let clean_input = ansi_regex.replace_all(input, "");
+    clean_input.len()
+}
+
 fn main() {
     let days: Vec<(Box<dyn Day>, &str)> = days!(get_days);
 
     let mut timing_results = Vec::new();
 
     let mut last_year = 0;
+
+    let mut total_time: f64 = 0.0;
+    let mut total_problems: usize = 0;
 
     for  (day_object, day_name) in days.iter() {
         let (year, day) = parse_solution_date(day_name);
@@ -147,7 +157,7 @@ fn main() {
 
         println!(
             "{0} {1} {2} {0}",
-            "---".bright_black(),
+            "-".repeat(3).bright_black(),
             format!("Day {}", day).bold(),
             "*".repeat(stars).bright_yellow().bold(),
         );
@@ -157,18 +167,44 @@ fn main() {
 
         for part in sorted_keys {
             if let Some((result, seconds)) = results.times.get(&part) {
-                println!(
-                    "Part {}: {} (took {})",
-                    part.bold(),
-                    result.green(),
-                    format!("{:.2?}", Duration::from_secs_f64(*seconds)).yellow()
-                );
+                // skip part 3s, since those are for fun
+                if part == "3" {
+                    println!(
+                        "{}",
+                        format!(
+                            "Part {}: {} (took {})",
+                            part,
+                            result,
+                            format!("{:.2?}", Duration::from_secs_f64(*seconds))
+                        ).bright_black(),
+                    );
+                } else {
+                    total_time += seconds;
+                    total_problems += 1;
+
+                    println!(
+                        "Part {}: {} (took {})",
+                        part.bold(),
+                        result.green(),
+                        format!("{:.2?}", Duration::from_secs_f64(*seconds)).yellow()
+                    );
+                }
             }
         }
 
         println!();
 
         timing_results.push(results);
+    }
+
+    if total_time != 0.0 {
+        let out = format!(
+            "Combined time ({} problems): {}",
+            total_problems.to_string().bright_yellow(),
+            format!("{:.2?}", Duration::from_secs_f64(total_time)).yellow()
+        );
+
+        println!("{}\n{}", "-".repeat(get_length_without_colors(&out)).bright_black(), out);
     }
 
     let json_file = "timing_results.json";
