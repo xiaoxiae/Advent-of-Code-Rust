@@ -35,6 +35,8 @@ macro_rules! get_days {
 }
 
 define_days!(
+    y15d5 => Y15D5,
+    y15d6 => Y15D6,
     y24d1 => Y24D1,
     y24d2 => Y24D2,
     y24d3 => Y24D3,
