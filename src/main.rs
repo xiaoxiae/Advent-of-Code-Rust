@@ -39,6 +39,7 @@ define_days!(
     y15d6 => Y15D6,
     y15d7 => Y15D7,
     y15d8 => Y15D8,
+    y15d9 => Y15D9,
     y24d1 => Y24D1,
     y24d2 => Y24D2,
     y24d3 => Y24D3,
@@ -112,6 +113,10 @@ fn main() {
 
     for  (day_object, day_name) in days.iter() {
         let (year, day) = parse_solution_date(day_name);
+        
+        if year != 15 {
+            continue;
+        }
 
         let input_file = format!("data/{}/input.in", day_name);
         let input = std::fs::read_to_string(&input_file)
