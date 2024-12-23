@@ -5,24 +5,19 @@ use rustc_hash::{FxHashMap as HashMap, FxHashSet as HashSet};
 pub struct Y24D23;
 
 fn get_largest_clique(
-    clique: &Vec<u16>,
-    remaining: &[u16],
-    max_clique_size: usize,
+    clique: Vec<u16>,
+    remaining: &Vec<u16>,
     graph: &HashMap<u16, HashSet<u16>>,
 ) -> Vec<u16> {
-    if max_clique_size == clique.len() {
-        return clique.clone();
-    }
-
     if remaining.len() == 0 {
-        return clique.clone();
+        return clique;
     }
 
     let u = remaining[0];
     let u_neighbours = graph.get(&u).unwrap();
 
     let mut valid = true;
-    for &v in clique {
+    for &v in &clique {
         if !u_neighbours.contains(&v) {
             valid = false;
             break;
@@ -34,21 +29,18 @@ fn get_largest_clique(
         let mut new = clique.clone();
         new.push(u);
 
-        o1 = get_largest_clique(
-            &new,
-            &remaining[1..],
-            max_clique_size.min(u_neighbours.len()),
-            graph,
-        );
+        let new_remaining: Vec<_> = remaining
+            .iter()
+            .filter(|&r| u_neighbours.contains(&r))
+            .map(|&v| v)
+            .collect();
+
+        o1 = get_largest_clique(new, &new_remaining, graph);
     }
 
-    let o2 = get_largest_clique(clique, &remaining[1..], max_clique_size, graph);
+    let o2 = get_largest_clique(clique, &remaining[1..].to_vec(), graph);
 
-    if o1.len() > o2.len() {
-        o1
-    } else {
-        o2
-    }
+    std::cmp::max_by_key(o1, o2, |o| o.len())
 }
 
 impl Day for Y24D23 {
@@ -105,10 +97,10 @@ impl Day for Y24D23 {
             });
 
         let mut nodes: Vec<_> = graph.keys().map(|&v| v).collect();
-        nodes.sort();
+        nodes.sort_unstable();
 
-        let mut clique = get_largest_clique(&vec![], &nodes[..], usize::MAX, &graph);
-        clique.sort();
+        let mut clique = get_largest_clique(vec![], &nodes, &graph);
+        clique.sort_unstable();
 
         Option::from(
             clique
