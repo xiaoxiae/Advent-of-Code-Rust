@@ -1,91 +1,129 @@
+use rayon::prelude::*;
 use crate::util::Day;
 use itertools::Itertools;
 use rand::RngCore;
 use regex::Regex;
-use rustc_hash::{FxHashMap as HashMap, FxHashSet as HashSet};
+use rustc_hash::FxHashMap as HashMap;
+use std::collections::HashSet;
+use std::sync::atomic::{AtomicUsize, Ordering};
+use dashmap::DashMap;
 
 pub struct Y24D24;
 
 #[derive(Debug, Clone)]
-struct Command {
-    left: String,
-    command: String,
-    right: String,
+enum CommandType {
+    AND,
+    OR,
+    XOR,
 }
 
-// fn string_to_identifier(str: String) -> u32 {
-//     // TODO: string is at most 4 ASCII characters, convert them into bytes
-// }
+#[derive(Debug, Clone)]
+struct Command {
+    left: u32,
+    command: CommandType,
+    right: u32,
+}
 
-fn parse(input: &str) -> (HashMap<String, bool>, HashMap<String, Command>) {
+fn string_to_identifier(str: String) -> u32 {
+    let bytes = str.as_bytes();
+    let mut result = 0u32;
+
+    for (i, &byte) in bytes.iter().take(4).enumerate() {
+        result |= (byte as u32) << (8 * (3 - i));
+    }
+
+    result
+}
+
+fn identifier_to_string(id: u32) -> String {
+    let mut chars = Vec::new();
+
+    for i in (0..4).rev() {
+        let byte = ((id >> (8 * i)) & 0xFF) as u8;
+
+        if byte != 0 {
+            chars.push(byte as char);
+        }
+    }
+
+    chars.iter().collect()
+}
+
+fn parse(input: &str) -> (HashMap<u32, bool>, HashMap<u32, Command>) {
     let (initial, connections) = input.split_once("\n\n").unwrap();
 
     let initial_re = Regex::new(r"(\w+): (\d+)").unwrap();
     let connections_re = Regex::new(r"(\w+) (OR|XOR|AND) (\w+) -> (\w+)").unwrap();
 
-    let mut wires: HashMap<String, bool> = HashMap::default();
+    let mut wires: HashMap<u32, bool> = HashMap::default();
 
     initial.lines().for_each(|line| {
         let captures = initial_re.captures(line).unwrap();
         wires.insert(
-            captures[1].to_string(),
+            string_to_identifier(captures[1].to_string()),
             captures[2].parse::<u8>().unwrap() != 0,
         );
     });
 
-    let mut commands: HashMap<String, Command> = HashMap::default();
+    let mut commands: HashMap<u32, Command> = HashMap::default();
 
     connections.lines().for_each(|line| {
         let captures = connections_re.captures(line).unwrap();
 
-        let command = Command {
-            left: captures[1].to_string(),
-            command: captures[2].to_string(),
-            right: captures[3].to_string(),
+        let left = string_to_identifier(captures[1].to_string());
+        let right = string_to_identifier(captures[3].to_string());
+
+        let command = match captures[2].to_string().as_str() {
+            "AND" => CommandType::AND,
+            "OR" => CommandType::OR,
+            "XOR" => CommandType::XOR,
+            _ => panic!("Unknown command!"),
         };
 
-        commands.insert(captures[4].to_string(), command);
+        let command = Command {
+            left,
+            command,
+            right,
+        };
+
+        commands.insert(string_to_identifier(captures[4].to_string()), command);
     });
 
     (wires, commands)
 }
 
-fn _simulate(
-    wire: &String,
-    wires: &mut HashMap<String, bool>,
-    commands: &HashMap<String, Command>,
-) {
-    if wires.contains_key(wire) {
+fn _simulate(wire: u32, wires: &mut HashMap<u32, bool>, commands: &HashMap<u32, Command>) {
+    if wires.contains_key(&wire) {
         return;
     }
 
-    let command = commands.get(wire).unwrap();
+    let command = commands.get(&wire).unwrap();
 
-    // this is to prevent infinite cycles
+    // this is to prevent infinite cycles when rewiring
+    //
     // for part 1, this doesn't matter
-    // for part 2, we're doing heuristic shit anyway so it doesn't matter
-    wires.insert(wire.clone(), false);
+    // for part 2, we're doing heuristic shit anyway so it doesn't matter either
+    wires.insert(wire, false);
 
-    _simulate(&command.left, wires, commands);
-    _simulate(&command.right, wires, commands);
+    _simulate(command.left, wires, commands);
+    _simulate(command.right, wires, commands);
 
-    let result = match command.command.as_str() {
-        "AND" => wires[&command.left] && wires[&command.right],
-        "OR" => wires[&command.left] || wires[&command.right],
-        "XOR" => wires[&command.left] != wires[&command.right],
-        _ => panic!("Unknown command '{}'!", command.command),
+    let result = match command.command {
+        CommandType::AND => wires[&command.left] && wires[&command.right],
+        CommandType::OR => wires[&command.left] || wires[&command.right],
+        CommandType::XOR => wires[&command.left] != wires[&command.right],
     };
 
-    wires.insert(wire.clone(), result);
+    wires.insert(wire, result);
 }
 
-fn simulate(wires: &mut HashMap<String, bool>, commands: &HashMap<String, Command>) {
+fn simulate(wires: &mut HashMap<u32, bool>, commands: &HashMap<u32, Command>) {
     for wire in commands.keys() {
-        _simulate(wire, wires, &commands);
+        _simulate(*wire, wires, &commands);
     }
 }
 
-fn combine(prefix: char, wires: &HashMap<String, bool>) -> usize {
+fn combine(prefix: char, wires: &HashMap<u32, bool>) -> usize {
     let mut number: usize = 0;
 
     let mut w = wires.keys().cloned().collect::<Vec<_>>();
@@ -93,8 +131,7 @@ fn combine(prefix: char, wires: &HashMap<String, bool>) -> usize {
     w.reverse();
 
     for key in w {
-        if key.chars().nth(0).unwrap() == prefix {
-            // println!("{} -> {}", key, wires[&key]);
+        if (key >> 24) as u8 == prefix as u8 {
             number = (number << 1) | (if wires[&key] { 1 } else { 0 });
         }
     }
@@ -112,89 +149,77 @@ impl Day for Y24D24 {
         keys.sort_unstable();
         keys.reverse();
 
-        let mut number: usize = 0;
-        for key in keys {
-            if key.chars().nth(0).unwrap() == 'z' {
-                number = (number << 1) | (if wires[&key] { 1 } else { 0 });
-            }
-        }
+        let number = combine('z', &wires);
 
         Option::from(number.to_string())
     }
 
     fn solve_part2(&self, input: &str) -> Option<String> {
-        let (mut wires, commands) = parse(input);
+        let (mut wires, mut commands) = parse(input);
 
         // nullify all inputs
         for wire in wires.values_mut() {
             *wire = false;
         }
 
-        let mut swaps: HashMap<(String, String), usize> = HashMap::default();
+        // remember swaps that we did to fix the circuit
+        let swaps = DashMap::new(); // Thread-safe HashMap
 
-        for prefix in ['x'] {
-            let mut w = wires.keys().cloned().collect::<Vec<_>>();
-            w.sort_unstable();
+        let wire_keys: Vec<_> = wires.keys().cloned().collect();
 
-            let mut new_wires = wires.clone();
-            for wire in w {
-                if wire.chars().nth(0).unwrap() != prefix {
-                    continue;
-                }
+        // try adding only individual bits of x with zeroed y
+        wire_keys.par_iter().for_each(|wire| {
+            if (*wire >> 24) as u8 != 'x' as u8 {
+                return;
+            }
 
-                // first check that there even was an error
-                let mut tmp = new_wires.clone();
-                tmp.insert(wire.to_string(), true);
+            // Check that there was an error
+            let mut single_wires = wires.clone();
+            single_wires.insert(*wire, true);
 
-                simulate(&mut tmp, &commands);
+            simulate(&mut single_wires, &commands);
 
-                // println!("--- {} ---", wire);
+            if combine('x', &single_wires) == combine('z', &single_wires) {
+                return;
+            }
 
-                if combine(prefix, &tmp) == combine('z', &tmp) {
-                    continue;
-                }
+            let keys = commands.keys().cloned().collect::<Vec<_>>();
 
-                // println!("{} {}", combine(prefix, &new_wires), combine('z', &new_wires));
-                // panic!();
+            for k1 in &keys {
+                for k2 in &keys {
+                    if !(k1 < k2) {
+                        continue;
+                    }
 
-                let mut keys = commands.keys().cloned().collect::<Vec<_>>();
-                keys.sort_unstable();
+                    // Only swap wires that make a difference
+                    if single_wires[k1] == single_wires[k2] {
+                        continue;
+                    }
 
-                let mut total = 0;
+                    let mut swapped_commands = commands.clone();
 
-                for k1 in &keys {
-                    for k2 in &keys {
-                        if !(k1 < k2) {
-                            continue;
-                        }
+                    let a = swapped_commands.get_mut(k1).unwrap() as *mut Command;
+                    let b = swapped_commands.get_mut(k2).unwrap() as *mut Command;
+                    unsafe {
+                        std::ptr::swap(a, b);
+                    }
 
-                        // only swap wires that make a difference
-                        if tmp[k1] == tmp[k2] {
-                            continue;
-                        }
+                    let mut swapped_wires = wires.clone();
+                    swapped_wires.insert(*wire, true);
 
-                        let mut new_commands = commands.clone();
+                    simulate(&mut swapped_wires, &swapped_commands);
 
-                        if let (Some(value1), Some(value2)) =
-                            (new_commands.get(k1).cloned(), new_commands.get(k2).cloned())
-                        {
-                            new_commands.insert(k1.to_string(), value2);
-                            new_commands.insert(k2.to_string(), value1);
-                        }
-
-                        let mut newest_wires = new_wires.clone();
-                        newest_wires.insert(wire.to_string(), true);
-
-                        simulate(&mut newest_wires, &new_commands);
-
-                        if combine(prefix, &newest_wires) == combine('z', &newest_wires) {
-                            *swaps.entry((k1.to_string(), k2.to_string())).or_insert(0) += 1;
-                            total += 1;
-                        }
+                    if combine('x', &swapped_wires) == combine('z', &swapped_wires) {
+                        swaps.entry((*k1, *k2)).or_insert_with(|| AtomicUsize::new(0)).fetch_add(1, Ordering::Relaxed);
                     }
                 }
             }
-        }
+        });
+
+        let swaps: HashMap<_, _> = swaps
+            .into_iter()
+            .map(|(key, value)| (key, value.load(Ordering::Relaxed)))
+            .collect();
 
         let mut values: Vec<_> = swaps.iter().map(|(_, v)| v).collect();
         values.sort_unstable();
@@ -202,17 +227,20 @@ impl Day for Y24D24 {
         // this now presumably gives candidates for swaps
         let candidates = swaps
             .iter()
-            .filter_map(|(k, v)| {
+            .filter_map(|((i, j), v)| {
                 if v == *values.iter().max().unwrap() {
-                    Some(k)
+                    Some((*i, *j))
                 } else {
                     None
                 }
             })
             .collect::<Vec<_>>();
 
-        for combinations in candidates.iter().combinations(4) {
-            let mut seen_values = HashSet::default();
+        candidates.into_iter().combinations(4)
+            .collect::<Vec<Vec<_>>>()
+            .par_iter().find_map_any(|combinations|
+        {
+            let mut seen_values: HashSet<u32> = HashSet::default();
 
             let unique = combinations
                 .iter()
@@ -220,11 +248,21 @@ impl Day for Y24D24 {
                 .all(|value| seen_values.insert(value));
 
             if !unique {
-                continue;
+                return None;
             }
 
             let mut rng = rand::thread_rng();
             let mut error = false;
+
+            let mut swapped_commands = commands.clone();
+
+            for (k1, k2) in combinations {
+                let a = swapped_commands.get_mut(k1).unwrap() as *mut Command;
+                let b = swapped_commands.get_mut(k2).unwrap() as *mut Command;
+                unsafe {
+                    std::ptr::swap(a, b);
+                }
+            }
 
             for _ in 0..100 {
                 let mut x: usize = rng.next_u64() as usize;
@@ -235,42 +273,32 @@ impl Day for Y24D24 {
 
                 let orig_z = x + y;
 
-                let mut newest_wires = wires.clone();
+                let mut swapped_wires = wires.clone();
 
                 let mut w = wires.keys().cloned().collect::<Vec<_>>();
                 w.sort_unstable();
 
-                for key in w {
-                    if key.chars().nth(0).unwrap() == 'x' {
-                        newest_wires.insert(key, (x & 1) == 1);
+                for wire in w {
+                    if (wire >> 24) as u8 == 'x' as u8 {
+                        swapped_wires.insert(wire, (x & 1) == 1);
                         x >>= 1;
-                    } else if key.chars().nth(0).unwrap() == 'y' {
-                        newest_wires.insert(key, (y & 1) == 1);
+                    } else if (wire >> 24) as u8 == 'y' as u8 {
+                        swapped_wires.insert(wire, (y & 1) == 1);
                         y >>= 1;
                     }
                 }
 
-                let mut new_commands = commands.clone();
-                for (k1, k2) in &combinations {
-                    if let (Some(value1), Some(value2)) =
-                        (new_commands.get(k1).cloned(), new_commands.get(k2).cloned())
-                    {
-                        new_commands.insert(k1.to_string(), value2);
-                        new_commands.insert(k2.to_string(), value1);
-                    }
-                }
+                simulate(&mut swapped_wires, &swapped_commands);
 
-                simulate(&mut newest_wires, &new_commands);
-
-                let mut w = newest_wires.keys().cloned().collect::<Vec<_>>();
+                let mut w = swapped_wires.keys().cloned().collect::<Vec<_>>();
                 w.sort_unstable();
                 w.reverse();
 
                 let mut z = 0;
 
-                for key in w {
-                    if key.chars().nth(0).unwrap() == 'z' {
-                        z = (z << 1) | (if newest_wires[&key] { 1 } else { 0 });
+                for wire in w {
+                    if (wire >> 24) as u8 == 'z' as u8 {
+                        z = (z << 1) | (if swapped_wires[&wire] { 1 } else { 0 });
                     }
                 }
 
@@ -283,15 +311,15 @@ impl Day for Y24D24 {
             if !error {
                 let mut parts = combinations
                     .iter()
-                    .flat_map(|(a, b)| [a.clone(), b.clone()]) // Flatten each tuple into individual strings
+                    .flat_map(|(a, b)| [a, b]) // Flatten each tuple into individual strings
                     .collect::<Vec<_>>();
 
                 parts.sort_unstable();
 
-                return Option::from(parts.join(","));
+                return Option::from(parts.into_iter().map(|v| identifier_to_string(*v)).join(","));
             }
-        }
-
-        None
+            
+            None
+        })
     }
 }
