@@ -41,6 +41,7 @@ define_days!(
     y15d8 => Y15D8,
     y15d9 => Y15D9,
     y15d10 => Y15D10,
+    y15d11 => Y15D11,
     y24d1 => Y24D1,
     y24d2 => Y24D2,
     y24d3 => Y24D3,
@@ -116,6 +117,10 @@ fn main() {
         let (year, day) = parse_solution_date(day_name);
         
         if year != 15 {
+            continue;
+        }
+
+        if day != 11 {
             continue;
         }
 
