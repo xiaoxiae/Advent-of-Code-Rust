@@ -195,12 +195,18 @@ fn main() {
                         ).bright_black(),
                     );
                 } else {
+                    let mut time_string = format!("{:.2?}", Duration::from_secs_f64(*seconds));
+
                     total_time += seconds;
                     println!(
                         "Part {}: {} (took {})",
                         part.bold(),
-                        result.green(),
-                        format!("{:.2?}", Duration::from_secs_f64(*seconds)).yellow()
+                        result.bright_blue(),
+                        match seconds {
+                            &s if s * 1000.0 < 1.0 => time_string.green(),
+                            &s if s * 1000.0 < 10.0 => time_string.yellow(),
+                            _ => time_string.red(),
+                        },
                     );
                 }
             }
