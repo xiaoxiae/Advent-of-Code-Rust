@@ -35,6 +35,10 @@ macro_rules! get_days {
 }
 
 define_days!(
+    y15d1 => Y15D1,
+    y15d2 => Y15D2,
+    y15d3 => Y15D3,
+    y15d4 => Y15D4,
     y15d5 => Y15D5,
     y15d6 => Y15D6,
     y15d7 => Y15D7,
@@ -119,10 +123,6 @@ fn main() {
         let (year, day) = parse_solution_date(day_name);
         
         if year != 15 {
-            continue;
-        }
-
-        if day != 13 {
             continue;
         }
 
