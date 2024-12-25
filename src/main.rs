@@ -43,6 +43,7 @@ define_days!(
     y15d10 => Y15D10,
     y15d11 => Y15D11,
     y15d12 => Y15D12,
+    y15d13 => Y15D13,
     y24d1 => Y24D1,
     y24d2 => Y24D2,
     y24d3 => Y24D3,
@@ -121,7 +122,7 @@ fn main() {
             continue;
         }
 
-        if day != 12 {
+        if day != 13 {
             continue;
         }
 
