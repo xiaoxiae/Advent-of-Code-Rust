@@ -3,6 +3,10 @@ use regex::Regex;
 
 pub struct Y15D15;
 
+static TEASPOONS: usize = 100;
+static REQUIRED_CALORIES: usize = 500;
+
+
 fn parse(input: &str) -> Vec<Vec<isize>> {
     let re = Regex::new(r"([+-]?\d+)").unwrap();
 
@@ -21,7 +25,7 @@ fn get_best_cookie(
     ingredient_index: usize,
     ingredient_split: &mut Vec<usize>,
     ingredients: &Vec<Vec<isize>>,
-    required_calories: Option<isize>,
+    required_calories: Option<usize>,
 ) -> isize {
     if ingredient_index == ingredients.len() {
         if teaspoons != 0 {
@@ -41,7 +45,7 @@ fn get_best_cookie(
             if i == ingredients[0].len() - 1 {
                 // possibly require a specific amount
                 if let Some(c) = required_calories {
-                    if current != c {
+                    if current != (c as isize) {
                         return 0;
                     }
                 }
@@ -80,7 +84,7 @@ impl Day for Y15D15 {
         let ingredients = parse(input);
 
         let mut ingredient_splits = vec![0; ingredients.len()];
-        let max_ingredients = get_best_cookie(100, 0, &mut ingredient_splits, &ingredients, None);
+        let max_ingredients = get_best_cookie(TEASPOONS, 0, &mut ingredient_splits, &ingredients, None);
 
         Option::from(max_ingredients.to_string())
     }
@@ -90,11 +94,11 @@ impl Day for Y15D15 {
 
         let mut ingredient_splits = vec![0; ingredients.len()];
         let max_ingredients = get_best_cookie(
-            100,
+            TEASPOONS,
             0,
             &mut ingredient_splits,
             &ingredients,
-            Option::from(500),
+            Option::from(REQUIRED_CALORIES),
         );
 
         Option::from(max_ingredients.to_string())
