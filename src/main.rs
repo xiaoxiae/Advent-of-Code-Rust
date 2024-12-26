@@ -69,7 +69,10 @@ define_days!(
     y24d19 => Y24D19,
     y24d20 => Y24D20,
     y24d21 => Y24D21,
-    y24d22 => Y24D22
+    y24d22 => Y24D22,
+    y24d23 => Y24D23,
+    y24d24 => Y24D24,
+    y24d25 => Y24D25
 );
 
 days!(declare_days);
@@ -115,9 +118,10 @@ fn main() {
     let mut timing_results = Vec::new();
 
     let mut last_year = 0;
+    let mut last_stars = 0;
 
     let mut total_time: f64 = 0.0;
-    let mut total_problems: usize = 0;
+    let mut total_valid_stars: usize = 0;
 
     for  (day_object, day_name) in days.iter() {
         let (year, day) = parse_solution_date(day_name);
@@ -126,11 +130,22 @@ fn main() {
             continue;
         }
 
+        if year != last_year {
+            println!(
+                "{0}\n{1}\n{0}\n",
+                "---====---".bright_black(),
+                format!("   20{}   ", year).bold(),
+            );
+
+            last_year = year;
+            last_stars = total_valid_stars;
+        }
+
         let input_file = format!("data/{}/input.in", day_name);
         let input = std::fs::read_to_string(&input_file)
             .expect(&format!("Failed to read input file: {}", input_file));
 
-        let mut stars = 0;
+        let mut day_stars = 0;
         let mut results = TimingResult {
             day: day,
             year: year,
@@ -144,7 +159,13 @@ fn main() {
             let result = if part == 1 {
                 day_object.solve_part1(&input)
             } else if part == 2 {
-                day_object.solve_part2(&input)
+                // day 25 part 2 is always special, since it only requires you to do the previous 49 challenges
+                if day == 25 {
+                    day_object.solve_part2(&*(total_valid_stars - last_stars).to_string())
+                } else {
+                    day_object.solve_part2(&input)
+                }
+
             } else {
                 day_object.solve_part3(&input)
             };
@@ -153,7 +174,12 @@ fn main() {
 
             match result {
                 Some(value) => {
-                    stars += 1;
+                    day_stars += 1;
+
+                    if part <= 2 {
+                        total_valid_stars += 1;
+                    }
+
                     results
                         .times
                         .insert(part.to_string(), (value, duration.as_secs_f64()));
@@ -162,21 +188,11 @@ fn main() {
             }
         }
 
-        if year != last_year {
-            println!(
-                "{0}\n{1}\n{0}\n",
-                "---====---".bright_black(),
-                format!("   20{}   ", year).bold(),
-            );
-
-            last_year = year;
-        }
-
         println!(
             "{0} {1} {2} {0}",
             "-".repeat(3).bright_black(),
             format!("Day {}", day).bold(),
-            "*".repeat(stars).bright_yellow().bold(),
+            "*".repeat(day_stars).bright_yellow().bold(),
         );
 
         let mut sorted_keys: Vec<String> = results.times.keys().cloned().collect();
@@ -196,14 +212,18 @@ fn main() {
                         ).bright_black(),
                     );
                 } else {
-                    total_time += seconds;
-                    total_problems += 1;
+                    let mut time_string = format!("{:.2?}", Duration::from_secs_f64(*seconds));
 
+                    total_time += seconds;
                     println!(
                         "Part {}: {} (took {})",
                         part.bold(),
-                        result.green(),
-                        format!("{:.2?}", Duration::from_secs_f64(*seconds)).yellow()
+                        result.bright_blue(),
+                        match seconds {
+                            &s if s * 1000.0 < 1.0 => time_string.green(),
+                            &s if s * 1000.0 < 10.0 => time_string.yellow(),
+                            _ => time_string.red(),
+                        },
                     );
                 }
             }
@@ -217,7 +237,7 @@ fn main() {
     if total_time != 0.0 {
         let out = format!(
             "Combined time ({} problems): {}",
-            total_problems.to_string().bright_yellow(),
+            total_valid_stars.to_string().bright_yellow(),
             format!("{:.2?}", Duration::from_secs_f64(total_time)).yellow()
         );
 
