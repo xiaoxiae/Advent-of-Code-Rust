@@ -13,7 +13,7 @@ impl Day for D2 {
 
             if let [a, b, c] = dimensions.as_slice() {
                 let surface_area = 2 * (a * b + b * c + c * a);
-                let slack = (a * b).min((b * c)).min((c * a));
+                let slack = (a * b).min(b * c).min(c * a);
                 total += surface_area + slack;
             }
         }

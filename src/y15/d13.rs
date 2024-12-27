@@ -1,7 +1,7 @@
 use crate::util::Day;
 use itertools::Itertools;
 use regex::Regex;
-use rustc_hash::{FxHashMap as HashMap, FxHashMap, FxHashSet as HashSet};
+use rustc_hash::{FxHashMap as HashMap, FxHashSet as HashSet};
 
 pub struct D13;
 

@@ -16,7 +16,7 @@ fn simulate(map: &mut Vec<Vec<bool>>, steps: usize, corners: bool) {
             map[h - 1][w - 1] = true;
         }
 
-        let mut original_map = map.clone();
+        let original_map = map.clone();
 
         for y in 0..original_map.len() {
             for x in 0..original_map[0].len() {

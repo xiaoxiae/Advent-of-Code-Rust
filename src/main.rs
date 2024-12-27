@@ -3,39 +3,27 @@ mod util;
 // Define a macro to declare days for multiple years.
 macro_rules! define_years {
     ($($year:ident => { $($day_snake:ident => $day_pascal:ident),* }),*) => {
-        macro_rules! days_by_year {
-            ($action:ident) => {
+        $(
+            mod $year {
                 $(
-                    $action!($year, $($day_snake => $day_pascal),*);
+                    pub mod $day_snake;
                 )*
-            };
+
+                $(
+                    pub use crate::$year::$day_snake::$day_pascal;
+                )*
+            }
+        )*
+
+        macro_rules! days_vector {
+            () => {
+                vec![
+                    $($(
+                        (Box::new($year::$day_pascal), stringify!($year), stringify!($day_snake)),
+                    )*)*
+                ]
+            }
         }
-    };
-}
-
-// Declare modules and imports for each year.
-macro_rules! declare_days {
-    ($year:ident, $($day_snake:ident => $day_pascal:ident),*) => {
-        mod $year {
-            $(
-                pub mod $day_snake;
-            )*
-
-            $(
-                pub use crate::$year::$day_snake::$day_pascal;
-            )*
-        }
-    };
-}
-
-// Collect all days into a single vector.
-macro_rules! get_days {
-    ($year:ident, $($day_snake:ident => $day_pascal:ident),*) => {
-        vec![
-            $(
-                (Box::new($year::$day_pascal), concat!(stringify!($year), "::", stringify!($day_snake))),
-            )*
-        ]
     };
 }
 
@@ -90,9 +78,6 @@ define_years!(
     }
 );
 
-// Execute actions for each year and day.
-days_by_year!(declare_days);
-
 use crate::util::Day;
 use colored::Colorize;
 use regex::Regex;
@@ -108,19 +93,6 @@ struct TimingResult {
     year: usize,
 }
 
-fn parse_solution_date(input: &str) -> (usize, usize) {
-    let re = Regex::new(r"^y(\d+)::d(\d+)$").unwrap();
-
-    if let Some(captures) = re.captures(input) {
-        let year = captures.get(1).unwrap().as_str().parse().unwrap();
-        let day = captures.get(2).unwrap().as_str().parse().unwrap();
-
-        return (year, day);
-    }
-
-    panic!("Invalid date string '{}'", input);
-}
-
 /// Gets the actual length of a string by stripping the ANSI escape codes.
 fn get_length_without_colors(input: &str) -> usize {
     let ansi_regex = Regex::new(r"\x1b\[[0-9;]*m").unwrap();
@@ -129,7 +101,7 @@ fn get_length_without_colors(input: &str) -> usize {
 }
 
 fn main() {
-    let days: Vec<(Box<dyn Day>, &str)> = days_by_year!(get_days);
+    let days: Vec<(Box<dyn Day>, &str,  &str)> = days_vector!();
 
     let mut timing_results = Vec::new();
 
@@ -139,12 +111,9 @@ fn main() {
     let mut total_time: f64 = 0.0;
     let mut total_valid_stars: usize = 0;
 
-    for  (day_object, day_name) in days.iter() {
-        let (year, day) = parse_solution_date(day_name);
-        
-        if year != 15 {
-            continue;
-        }
+    for (day_object, year_name, day_name) in days {
+        let year = year_name[1..].parse::<usize>().unwrap();
+        let day = day_name[1..].parse::<usize>().unwrap();
 
         if year != last_year {
             println!(
@@ -181,7 +150,6 @@ fn main() {
                 } else {
                     day_object.solve_part2(&input)
                 }
-
             } else {
                 day_object.solve_part3(&input)
             };
@@ -225,10 +193,11 @@ fn main() {
                             part,
                             result,
                             format!("{:.2?}", Duration::from_secs_f64(*seconds))
-                        ).bright_black(),
+                        )
+                        .bright_black(),
                     );
                 } else {
-                    let mut time_string = format!("{:.2?}", Duration::from_secs_f64(*seconds));
+                    let time_string = format!("{:.2?}", Duration::from_secs_f64(*seconds));
 
                     total_time += seconds;
                     println!(
@@ -257,7 +226,11 @@ fn main() {
             format!("{:.2?}", Duration::from_secs_f64(total_time)).yellow()
         );
 
-        println!("{}\n{}", "-".repeat(get_length_without_colors(&out)).bright_black(), out);
+        println!(
+            "{}\n{}",
+            "-".repeat(get_length_without_colors(&out)).bright_black(),
+            out
+        );
     }
 
     let json_file = "timing_results.json";
@@ -304,10 +277,11 @@ mod tests {
 
     #[test]
     fn test_all_days() {
-        let days: Vec<(Box<dyn Day>, &str)> = days_by_year!(get_days);
+        let days: Vec<(Box<dyn Day>, &str, &str)> = days_vector!();
 
-        for (day_box, day_name) in days {
-            let (year, day) = parse_solution_date(day_name);
+        for (day_object, year_name, day_name) in days {
+            let year = year_name[1..].parse::<usize>().unwrap();
+            let day = day_name[1..].parse::<usize>().unwrap();
 
             for part in ["part1", "part2"] {
                 let samples = find_samples(format!("data/y{}/d{}/{}", year, day, part).as_str());
@@ -323,13 +297,19 @@ mod tests {
 
                     if part == "part1" {
                         assert_eq!(
-                            day_box.solve_part1(&input), Option::from(expected_output),
-                            "{}, {} failed", day_name, part,
+                            day_box.solve_part1(&input),
+                            Option::from(expected_output),
+                            "{}, {} failed",
+                            day_name,
+                            part,
                         );
                     } else {
                         assert_eq!(
-                            day_box.solve_part2(&input), Option::from(expected_output),
-                            "{}, {} failed", day_name, part,
+                            day_box.solve_part2(&input),
+                            Option::from(expected_output),
+                            "{}, {} failed",
+                            day_name,
+                            part,
                         );
                     }
                 }

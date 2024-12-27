@@ -34,8 +34,6 @@ impl Day for D8 {
         let total: usize = input
             .lines()
             .map(|l| {
-                let mut i: usize = 0;
-
                 let mut chars = 0;
                 let l = l.chars().collect::<Vec<char>>();
 

@@ -155,7 +155,7 @@ impl Day for D24 {
     }
 
     fn solve_part2(&self, input: &str) -> Option<String> {
-        let (mut wires, mut commands) = parse(input);
+        let (mut wires, commands) = parse(input);
 
         // nullify all inputs
         for wire in wires.values_mut() {
@@ -251,7 +251,7 @@ impl Day for D24 {
                 return None;
             }
 
-            let mut rng = rand::thread_rng();
+            let mut rng = rand::rng();
             let mut error = false;
 
             let mut swapped_commands = commands.clone();

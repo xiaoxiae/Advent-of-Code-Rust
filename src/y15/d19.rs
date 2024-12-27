@@ -1,21 +1,9 @@
 use crate::util::Day;
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 
 pub struct D19;
 
-// fn generate_replacements(
-//     current: String,
-//     replacements: &HashMap<String, String>,
-//     generated: &mut HashSet<String>,
-// ) {
-//     for (from, to) in replacements.iter() {
-//         if current.starts_with(from) {
-//             j
-//         }
-//     }
-// }
-
-fn neighbours(molecule: String, replacements: &Vec<(String, String)>) -> Vec<String> {
+fn neighbours(molecule: &String, replacements: &Vec<(String, String)>) -> Vec<String> {
     let mut molecules = HashSet::new();
 
     for (from, to) in replacements {
@@ -48,19 +36,28 @@ fn parse(input: &str) -> (Vec<(String, String)>, String) {
 }
 
 
-fn devolve(molecule: String, depth: usize, replacements: &Vec<(String, String)>) -> usize {
+fn devolve(molecule: String, replacements: &Vec<(String, String)>, cache: &mut HashMap<String, usize>) -> usize {
     if molecule == "e" {
-        return depth;
+        return 0;
+    }
+
+    if cache.contains_key(&molecule) {
+        return cache[&molecule];
     }
 
     let mut min_depth = usize::MAX;
-    for neighbour in neighbours(molecule, &replacements) {
-        min_depth = min_depth.min(devolve(neighbour, depth + 1, &replacements));
+    for neighbour in neighbours(&molecule, &replacements) {
+        let result = devolve(neighbour, &replacements, cache);
 
         // looking through the input, it looks pretty linear so we just assume it's unique
-        if min_depth != usize::MAX {
+        if result != usize::MAX {
+            min_depth = 1 + min_depth.min(result);
             break;
         }
+    }
+
+    if min_depth != usize::MAX {
+        cache.insert(molecule, min_depth);
     }
 
     min_depth
@@ -71,21 +68,27 @@ impl Day for D19 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let (replacements, molecule) = parse(input);
 
-        let molecules = neighbours(molecule, &replacements);
+        let molecules = neighbours(&molecule, &replacements);
 
         Option::from(molecules.len().to_string())
     }
 
     fn solve_part2(&self, input: &str) -> Option<String> {
-        let (replacements, molecule) = parse(input);
+        None
 
-        let mut inverse_replacements: Vec<(String, String)> = vec![];
-        for (from, to) in &replacements {
-            inverse_replacements.push((to.to_string(), from.to_string()));
-        }
+        // TODO: this sometimes go into an infinite loop -- fix me!
 
-        let distance: usize = devolve(molecule, 0, &inverse_replacements);
+        // let (replacements, molecule) = parse(input);
 
-        Option::from(distance.to_string())
+        // let mut inverse_replacements: Vec<(String, String)> = vec![];
+        // for (from, to) in &replacements {
+        //     inverse_replacements.push((to.to_string(), from.to_string()));
+        // }
+
+        // let mut cache = HashMap::new();
+
+        // let distance: usize = devolve(molecule, &inverse_replacements, &mut cache);
+
+        // Option::from(distance.to_string())
     }
 }

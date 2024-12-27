@@ -1,7 +1,6 @@
 use crate::util::Day;
 use regex::Regex;
 use std::collections::HashMap;
-use std::num::ParseIntError;
 
 pub struct D7;
 
@@ -79,11 +78,7 @@ fn solve(input: &str, b_value: Option<u16>) -> u16 {
         wires.insert("b".to_string(), v);
     }
 
-    let mut iter = 0;
-
     while commands.len() != 0 {
-        iter += 1;
-
         let mut i = 0;
         while i < commands.len() {
             let command = &commands[i];

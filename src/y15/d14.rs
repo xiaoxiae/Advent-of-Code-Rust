@@ -7,14 +7,13 @@ static FLIGHT_TIME: usize = 2503;
 
 #[derive(Debug)]
 struct Reindeer {
-    name: String,
     distance: usize,
     flight_time: usize,
     pause_time: usize,
 }
 
 fn parse(input: &str) -> Vec<Reindeer> {
-    let re = Regex::new(r"(?P<name>\w+) can fly (?P<distance>\d+) km/s for (?P<flight_time>\d+) seconds, but then must rest for (?P<pause>\d+) seconds.").unwrap();
+    let re = Regex::new(r"\w+ can fly (?P<distance>\d+) km/s for (?P<flight_time>\d+) seconds, but then must rest for (?P<pause>\d+) seconds.").unwrap();
 
     input
         .lines()
@@ -22,7 +21,6 @@ fn parse(input: &str) -> Vec<Reindeer> {
             let captures = re.captures(line).unwrap();
 
             Reindeer {
-                name: captures["name"].parse().unwrap(),
                 distance: captures["distance"].parse::<usize>().unwrap(),
                 flight_time: captures["flight_time"].parse::<usize>().unwrap(),
                 pause_time: captures["pause"].parse::<usize>().unwrap(),

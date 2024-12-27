@@ -8,7 +8,7 @@ impl Day for D4 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let id = input.trim();
 
-        let mut input = id.chars().map(|c| c as u8).collect::<Vec<_>>();
+        let input = id.chars().map(|c| c as u8).collect::<Vec<_>>();
 
         // TODO: not sure how to do this using infinite iterator
         (1..100_000_000)
@@ -32,7 +32,7 @@ impl Day for D4 {
     fn solve_part2(&self, input: &str) -> Option<String> {
         let id = input.trim();
 
-        let mut input = id.chars().map(|c| c as u8).collect::<Vec<_>>();
+        let input = id.chars().map(|c| c as u8).collect::<Vec<_>>();
 
         (1..100_000_000)
             .into_par_iter()
