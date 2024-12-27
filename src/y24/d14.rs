@@ -68,9 +68,9 @@ fn bot_position_variance(bots: &Vec<Bot>) -> i64 {
     x_distance * y_distance
 }
 
-pub struct Y24D14;
+pub struct D14;
 
-impl Day for Y24D14 {
+impl Day for D14 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let mut bots = parse_input(input);
 

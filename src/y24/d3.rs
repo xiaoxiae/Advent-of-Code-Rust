@@ -1,9 +1,9 @@
 use regex::Regex;
 use crate::util::Day;
 
-pub struct Y24D3;
+pub struct D3;
 
-impl Day for Y24D3 {
+impl Day for D3 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let mut total = 0;
 

@@ -1,7 +1,7 @@
 use crate::util::Day;
 use std::collections::HashMap;
 
-pub struct Y24D8;
+pub struct D8;
 
 fn parse_input(input: &str) -> (Vec<Vec<char>>, HashMap<char, Vec<(usize, usize)>>) {
     let map = input
@@ -59,7 +59,7 @@ fn create_antinodes(
     }
 }
 
-impl Day for Y24D8 {
+impl Day for D8 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let (mut map, coordinates) = parse_input(input);
 

@@ -84,9 +84,9 @@ fn solve(
     None
 }
 
-pub struct Y24D18;
+pub struct D18;
 
-impl Day for Y24D18 {
+impl Day for D18 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let bytes = parse_input(input);
 

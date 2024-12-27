@@ -2,7 +2,7 @@ use std::num::ParseIntError;
 use crate::util::Day;
 use rayon::prelude::*;
 
-pub struct Y24D25;
+pub struct D25;
 
 fn parse(input: &str) -> (Vec<Vec<usize>>, Vec<Vec<usize>>) {
     let mut keys: Vec<_> = vec![];
@@ -48,7 +48,7 @@ fn parse(input: &str) -> (Vec<Vec<usize>>, Vec<Vec<usize>>) {
     (keys, locks)
 }
 
-impl Day for Y24D25 {
+impl Day for D25 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let (keys, locks) = parse(input);
 

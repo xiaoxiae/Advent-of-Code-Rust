@@ -117,9 +117,9 @@ fn get_cheats(distances: &DistanceMap, cheat_time: isize) -> HashMap<usize, usiz
     cheats
 }
 
-pub struct Y24D20;
+pub struct D20;
 
-impl Day for Y24D20 {
+impl Day for D20 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let distances = get_distances(input);
         let cheats = get_cheats(&distances, 2);

@@ -144,9 +144,9 @@ fn solve(map: &mut Map, position: &mut Position, instructions: Instructions) -> 
     return total;
 }
 
-pub struct Y24D15;
+pub struct D15;
 
-impl Day for Y24D15 {
+impl Day for D15 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let (mut map, mut position, instructions) = parse_input(input);
 

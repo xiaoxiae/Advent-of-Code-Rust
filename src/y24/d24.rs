@@ -8,7 +8,7 @@ use std::collections::HashSet;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use dashmap::DashMap;
 
-pub struct Y24D24;
+pub struct D24;
 
 #[derive(Debug, Clone)]
 enum CommandType {
@@ -139,7 +139,7 @@ fn combine(prefix: char, wires: &HashMap<u32, bool>) -> usize {
     number
 }
 
-impl Day for Y24D24 {
+impl Day for D24 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let (mut wires, commands) = parse(input);
 

@@ -94,9 +94,9 @@ impl Trie {
 }
 
 
-pub struct Y24D19;
+pub struct D19;
 
-impl Day for Y24D19 {
+impl Day for D19 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let (stripes, patterns) = parse_input(input);
 

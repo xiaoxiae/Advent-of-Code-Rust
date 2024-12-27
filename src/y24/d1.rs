@@ -2,7 +2,7 @@ use crate::util::Day;
 use std::collections::HashMap;
 use itertools::Itertools;
 
-pub struct Y24D1;
+pub struct D1;
 
 fn parse_input(input: &str) -> (Vec<u32>, Vec<u32>) {
     input
@@ -14,7 +14,7 @@ fn parse_input(input: &str) -> (Vec<u32>, Vec<u32>) {
         .unzip()
 }
 
-impl Day for Y24D1 {
+impl Day for D1 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let (mut l, mut r) = parse_input(input);
 

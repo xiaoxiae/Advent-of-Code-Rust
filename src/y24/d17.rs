@@ -158,9 +158,9 @@ fn _genetic(instructions: &Instructions) -> Option<usize> {
     }
 }
 
-pub struct Y24D17;
+pub struct D17;
 
-impl Day for Y24D17 {
+impl Day for D17 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let (mut registers, instructions) = parse_input(input);
 

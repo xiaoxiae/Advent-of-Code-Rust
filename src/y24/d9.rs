@@ -3,7 +3,7 @@ use crate::util::Day;
 use std::collections::{BinaryHeap};
 use rustc_hash::{FxHashMap as HashMap};
 
-pub struct Y24D9;
+pub struct D9;
 
 fn build_memory(
     input: &str,
@@ -63,7 +63,7 @@ struct DataField {
     size: usize,
 }
 
-impl Day for Y24D9 {
+impl Day for D9 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let (mut memory, _, _) = build_memory(input);
 
