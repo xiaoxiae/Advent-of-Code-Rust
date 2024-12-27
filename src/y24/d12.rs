@@ -2,7 +2,7 @@ use crate::util::Day;
 use rustc_hash::FxHashSet as HashSet;
 use std::collections::VecDeque;
 
-pub struct Y24D12;
+pub struct D12;
 
 /// Return the indexes of the positions of the region at (x, y)
 fn get_region(map: &Vec<Vec<char>>, x: usize, y: usize) -> HashSet<(usize, usize)> {
@@ -38,7 +38,7 @@ fn get_region(map: &Vec<Vec<char>>, x: usize, y: usize) -> HashSet<(usize, usize
 }
 
 
-impl Day for Y24D12 {
+impl Day for D12 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let map = input.trim().split_terminator('\n')
             .map(|l| l.chars().collect())

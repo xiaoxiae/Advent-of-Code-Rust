@@ -4,7 +4,7 @@ use rayon::iter::ParallelIterator;
 use rayon::prelude::ParallelString;
 use rustc_hash::{FxBuildHasher, FxHashMap as HashMap};
 
-pub struct Y24D22;
+pub struct D22;
 
 static MOD: usize = 16_777_216;
 static STEPS: usize = 2_000;
@@ -16,7 +16,7 @@ fn evolve(mut number: usize) -> usize {
     (number ^ (number * 2048)) % MOD
 }
 
-impl Day for Y24D22 {
+impl Day for D22 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let sum: usize = input
             .trim()

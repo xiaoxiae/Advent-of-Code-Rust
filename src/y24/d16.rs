@@ -178,9 +178,9 @@ fn solve(
     (end_distance, distances, paths)
 }
 
-pub struct Y24D16;
+pub struct D16;
 
-impl Day for Y24D16 {
+impl Day for D16 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let (map, start, end) = parse_input(input);
         let (end_distance, _, _) = solve(map, start, end);

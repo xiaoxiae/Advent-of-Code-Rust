@@ -154,9 +154,9 @@ fn solve(input: &str, pads: &Vec<&PadPaths>) -> usize {
     complexities
 }
 
-pub struct Y24D21;
+pub struct D21;
 
-impl Day for Y24D21 {
+impl Day for D21 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let numpad = pad_paths(NUMPAD.map(|x| x.to_vec()).to_vec());
         let padpad = pad_paths(PADPAD.map(|x| x.to_vec()).to_vec());

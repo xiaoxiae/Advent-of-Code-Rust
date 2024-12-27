@@ -3,7 +3,7 @@ use rayon::prelude::*;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use rustc_hash::{FxHashMap as HashMap, FxHashSet as HashSet };
 
-pub struct Y24D6;
+pub struct D6;
 
 static DIRECTIONS: [(i32, i32); 4] = [(0, -1), (1, 0), (0, 1), (-1, 0)];
 
@@ -73,7 +73,7 @@ fn move_forward(
     }
 }
 
-impl Day for Y24D6 {
+impl Day for D6 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let (mut map, mut start) = parse_map(input);
 

@@ -1,7 +1,7 @@
 use crate::util::Day;
 use std::collections::{HashSet, VecDeque};
 
-pub struct Y24D10;
+pub struct D10;
 
 fn walk_trail(map: &Vec<Vec<usize>>, x: usize, y: usize) -> usize {
     let mut queue = VecDeque::from([(x, y, 0)]);
@@ -63,7 +63,7 @@ fn parse_map(input: &str) -> Vec<Vec<usize>> {
         .collect::<Vec<Vec<usize>>>()
 }
 
-impl Day for Y24D10 {
+impl Day for D10 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let map = parse_map(input);
 

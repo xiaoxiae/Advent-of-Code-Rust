@@ -9,7 +9,7 @@ static OOPSIE_DOOPSIE_FUCKY_WUCKY: usize = 10000000000000;
 
 static MAX_STEPS: usize = 100;
 
-pub struct Y24D13;
+pub struct D13;
 
 #[derive(Debug)]
 struct Contraption {
@@ -144,7 +144,7 @@ fn find_path_math(contraption: &Contraption, max_steps: usize) -> Option<usize> 
     None
 }
 
-impl Day for Y24D13 {
+impl Day for D13 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         Option::from(
             parse_input(input)

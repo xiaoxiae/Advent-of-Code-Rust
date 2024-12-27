@@ -1,88 +1,97 @@
 mod util;
 
-macro_rules! define_days {
-    ($($day_snake:ident => $day_pascal:ident),*) => {
-        macro_rules! days {
+// Define a macro to declare days for multiple years.
+macro_rules! define_years {
+    ($($year:ident => { $($day_snake:ident => $day_pascal:ident),* }),*) => {
+        macro_rules! days_by_year {
             ($action:ident) => {
-                $action!($($day_snake => $day_pascal),*);
+                $(
+                    $action!($year, $($day_snake => $day_pascal),*);
+                )*
             };
         }
     };
 }
 
+// Declare modules and imports for each year.
 macro_rules! declare_days {
-    ($($day_snake:ident => $day_pascal:ident),*) => {
-        mod days {
+    ($year:ident, $($day_snake:ident => $day_pascal:ident),*) => {
+        mod $year {
             $(
                 pub mod $day_snake;
             )*
-        }
 
-        $(
-            use crate::days::$day_snake::$day_pascal;
-        )*
+            $(
+                pub use crate::$year::$day_snake::$day_pascal;
+            )*
+        }
     };
 }
 
+// Collect all days into a single vector.
 macro_rules! get_days {
-    ($($day_snake:ident => $day_pascal:ident),*) => {
+    ($year:ident, $($day_snake:ident => $day_pascal:ident),*) => {
         vec![
             $(
-                (Box::new($day_pascal), stringify!($day_snake)),
+                (Box::new($year::$day_pascal), concat!(stringify!($year), "::", stringify!($day_snake))),
             )*
         ]
     };
 }
 
-define_days!(
-    y15d1 => Y15D1,
-    y15d2 => Y15D2,
-    y15d3 => Y15D3,
-    y15d4 => Y15D4,
-    y15d5 => Y15D5,
-    y15d6 => Y15D6,
-    y15d7 => Y15D7,
-    y15d8 => Y15D8,
-    y15d9 => Y15D9,
-    y15d10 => Y15D10,
-    y15d11 => Y15D11,
-    y15d12 => Y15D12,
-    y15d13 => Y15D13,
-    y15d14 => Y15D14,
-    y15d15 => Y15D15,
-    y15d16 => Y15D16,
-    y15d17 => Y15D17,
-    y15d18 => Y15D18,
-    y15d19 => Y15D19,
-    y15d20 => Y15D20,
-    y24d1 => Y24D1,
-    y24d2 => Y24D2,
-    y24d3 => Y24D3,
-    y24d4 => Y24D4,
-    y24d5 => Y24D5,
-    y24d6 => Y24D6,
-    y24d7 => Y24D7,
-    y24d8 => Y24D8,
-    y24d9 => Y24D9,
-    y24d10 => Y24D10,
-    y24d11 => Y24D11,
-    y24d12 => Y24D12,
-    y24d13 => Y24D13,
-    y24d14 => Y24D14,
-    y24d15 => Y24D15,
-    y24d16 => Y24D16,
-    y24d17 => Y24D17,
-    y24d18 => Y24D18,
-    y24d19 => Y24D19,
-    y24d20 => Y24D20,
-    y24d21 => Y24D21,
-    y24d22 => Y24D22,
-    y24d23 => Y24D23,
-    y24d24 => Y24D24,
-    y24d25 => Y24D25
+define_years!(
+    y15 => {
+        d1 => D1,
+        d2 => D2,
+        d3 => D3,
+        d4 => D4,
+        d5 => D5,
+        d6 => D6,
+        d7 => D7,
+        d8 => D8,
+        d9 => D9,
+        d10 => D10,
+        d11 => D11,
+        d12 => D12,
+        d13 => D13,
+        d14 => D14,
+        d15 => D15,
+        d16 => D16,
+        d17 => D17,
+        d18 => D18,
+        d19 => D19
+    },
+    y24 => {
+        d1 => D1,
+        d2 => D2,
+        d3 => D3,
+        d4 => D4,
+        d5 => D5,
+        d6 => D6,
+        d7 => D7,
+        d8 => D8,
+        d9 => D9,
+        d10 => D10,
+        d11 => D11,
+        d12 => D12,
+        d13 => D13,
+        d14 => D14,
+        d15 => D15,
+        d16 => D16,
+        d17 => D17,
+        d18 => D18,
+        d19 => D19,
+        d20 => D20,
+        d21 => D21,
+        d22 => D22,
+        d23 => D23,
+        d24 => D24,
+        d25 => D25
+    }
 );
 
-days!(declare_days);
+// Execute actions for each year and day.
+days_by_year!(declare_days);
 
 use crate::util::Day;
 use colored::Colorize;
@@ -100,7 +109,7 @@ struct TimingResult {
 }
 
 fn parse_solution_date(input: &str) -> (usize, usize) {
-    let re = Regex::new(r"^y(\d+)d(\d+)$").unwrap();
+    let re = Regex::new(r"^y(\d+)::d(\d+)$").unwrap();
 
     if let Some(captures) = re.captures(input) {
         let year = captures.get(1).unwrap().as_str().parse().unwrap();
@@ -120,7 +129,7 @@ fn get_length_without_colors(input: &str) -> usize {
 }
 
 fn main() {
-    let days: Vec<(Box<dyn Day>, &str)> = days!(get_days);
+    let days: Vec<(Box<dyn Day>, &str)> = days_by_year!(get_days);
 
     let mut timing_results = Vec::new();
 
@@ -148,7 +157,7 @@ fn main() {
             last_stars = total_valid_stars;
         }
 
-        let input_file = format!("data/{}/input.in", day_name);
+        let input_file = format!("data/y{}/d{}/input.in", year, day);
         let input = std::fs::read_to_string(&input_file)
             .expect(&format!("Failed to read input file: {}", input_file));
 
@@ -295,11 +304,13 @@ mod tests {
 
     #[test]
     fn test_all_days() {
-        let days: Vec<(Box<dyn Day>, &str)> = days!(get_days);
+        let days: Vec<(Box<dyn Day>, &str)> = days_by_year!(get_days);
 
-        for (day, day_name) in days {
+        for (day_box, day_name) in days {
+            let (year, day) = parse_solution_date(day_name);
+
             for part in ["part1", "part2"] {
-                let samples = find_samples(format!("data/{}/{}", day_name, part).as_str());
+                let samples = find_samples(format!("data/y{}/d{}/{}", year, day, part).as_str());
 
                 for (input_file, output_file) in &samples {
                     let input = fs::read_to_string(input_file)
@@ -312,12 +323,12 @@ mod tests {
 
                     if part == "part1" {
                         assert_eq!(
-                            day.solve_part1(&input), Option::from(expected_output),
+                            day_box.solve_part1(&input), Option::from(expected_output),
                             "{}, {} failed", day_name, part,
                         );
                     } else {
                         assert_eq!(
-                            day.solve_part2(&input), Option::from(expected_output),
+                            day_box.solve_part2(&input), Option::from(expected_output),
                             "{}, {} failed", day_name, part,
                         );
                     }

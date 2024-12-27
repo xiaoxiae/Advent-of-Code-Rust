@@ -2,7 +2,7 @@ use crate::util::Day;
 use itertools::Itertools;
 use rustc_hash::{FxHashMap as HashMap, FxHashSet as HashSet};
 
-pub struct Y24D23;
+pub struct D23;
 
 fn get_largest_clique(
     clique: Vec<u16>,
@@ -43,7 +43,7 @@ fn get_largest_clique(
     std::cmp::max_by_key(o1, o2, |o| o.len())
 }
 
-impl Day for Y24D23 {
+impl Day for D23 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let mut graph: HashMap<&str, HashSet<&str>> = HashMap::default();
 
