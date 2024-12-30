@@ -1,16 +1,19 @@
 use crate::util::Day;
-use std::collections::HashMap;
 use itertools::Itertools;
+use std::collections::HashMap;
 
 pub struct D1;
 
-fn parse_input(input: &str) -> (Vec<u32>, Vec<u32>) {
+fn parse_input(input: &str) -> (Vec<usize>, Vec<usize>) {
     input
         .trim()
-        .split_whitespace()
-        .map(|n| n.parse::<u32>().unwrap())
-        .chunks(2)
-        .into_iter().map(|c| c.collect_tuple::<(u32, u32)>().unwrap())
+        .lines()
+        .map(|l| {
+            l.split_whitespace()
+                .map(|n| n.parse::<usize>().unwrap())
+                .collect_tuple()
+                .unwrap()
+        })
         .unzip()
 }
 
@@ -21,11 +24,7 @@ impl Day for D1 {
         l.sort_unstable();
         r.sort_unstable();
 
-        let differences: u32 = l
-            .iter()
-            .zip(r.iter())
-            .map(|(x, y)| x.abs_diff(*y))
-            .sum();
+        let differences: usize = l.iter().zip(r.iter()).map(|(x, y)| x.abs_diff(*y)).sum();
 
         Option::from(differences.to_string())
     }
@@ -33,17 +32,16 @@ impl Day for D1 {
     fn solve_part2(&self, input: &str) -> Option<String> {
         let (l, r) = parse_input(input);
 
-        let mut occurrences: HashMap<u32, u32> = HashMap::new();
+        let mut occurrences: HashMap<usize, usize> = HashMap::new();
 
         for &item in &r {
             *occurrences.entry(item).or_insert(0) += 1;
         }
 
         Option::from(
-            l
-                .iter()
+            l.iter()
                 .map(|x| x * *occurrences.get(x).unwrap_or(&0))
-                .sum::<u32>()
+                .sum::<usize>()
                 .to_string(),
         )
     }
@@ -54,13 +52,13 @@ impl Day for D1 {
     fn solve_part3(&self, input: &str) -> Option<String> {
         let lists = parse_input(input);
 
-        let mut occurrences: Vec<HashMap<u32, Vec<u32>>> = Vec::new();
+        let mut occurrences: Vec<HashMap<usize, Vec<usize>>> = Vec::new();
 
         for list in [lists.0, lists.1] {
             let mut o = HashMap::new();
 
             for (i, &item) in list.iter().enumerate() {
-                o.entry(item).or_insert(Vec::new()).push(i as u32);
+                o.entry(item).or_insert(Vec::new()).push(i);
             }
 
             occurrences.push(o);
@@ -77,15 +75,15 @@ impl Day for D1 {
             let mut index_lists = vec![i1, i2];
             index_lists.sort_by(|a, b| a.len().cmp(&b.len()));
 
-            let mut min_distance = u32::MAX;
+            let mut min_distance = usize::MAX;
             for offset in 0..(index_lists[1].len() - index_lists[0].len() + 1) {
-                let distance: u32 = index_lists[0]
+                let distance: usize = index_lists[0]
                     .iter()
                     .zip(&index_lists[1][offset..index_lists[0].len() + offset])
                     .map(|(&a, &b)| a.abs_diff(b))
                     .sum();
 
-                min_distance = u32::min(distance, min_distance);
+                min_distance = usize::min(distance, min_distance);
             }
 
             distances += min_distance;
