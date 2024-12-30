@@ -111,6 +111,8 @@ fn main() {
     let mut total_time: f64 = 0.0;
     let mut total_valid_stars: usize = 0;
 
+    let mut year_times: HashMap<usize, (usize, f64)> = HashMap::new();
+
     for (day_object, year_name, day_name) in days {
         let year = year_name[1..].parse::<usize>().unwrap();
         let day = day_name[1..].parse::<usize>().unwrap();
@@ -172,6 +174,29 @@ fn main() {
             }
         }
 
+        if day_stars > 0 {
+            year_times
+                .entry(year)
+                .and_modify(|(count, time)| {
+                    *count += day_stars.min(2);  // no part 3s
+                    *time += results
+                        .times
+                        .values()
+                        .filter(|&&(ref _res, t)| t > 0.0)
+                        .map(|&(_, t)| t)
+                        .sum::<f64>();
+                })
+                .or_insert((
+                    day_stars.min(2),  // no part 3s
+                    results
+                        .times
+                        .values()
+                        .filter(|&&(ref _res, t)| t > 0.0)
+                        .map(|&(_, t)| t)
+                        .sum(),
+                ));
+        }
+
         println!(
             "{0} {1} {2} {0}",
             "-".repeat(3).bright_black(),
@@ -219,10 +244,30 @@ fn main() {
         timing_results.push(results);
     }
 
+    println!(
+        "{0}\n{1}\n{0}\n",
+        "---=======---".bright_black(),
+        format!("   Summary   ").bold(),
+    );
+
     if total_time != 0.0 {
+        let mut sorted_keys: Vec<usize> = year_times.keys().cloned().collect::<Vec<_>>();
+        sorted_keys.sort();
+
+        for key in sorted_keys {
+             if let Some(&(count, total)) = year_times.get(&key) {
+                 println!(
+                     "20{}: {} ({})",
+                     key,
+                     format!("{}", count).bright_yellow().bold(),
+                     format!("{:.2?}", Duration::from_secs_f64(total)).yellow()
+                 );
+             }
+        }
+
         let out = format!(
-            "Combined time ({} problems): {}",
-            total_valid_stars.to_string().bright_yellow(),
+            " all: {} ({})",
+            total_valid_stars.to_string().bright_yellow().bold(),
             format!("{:.2?}", Duration::from_secs_f64(total_time)).yellow()
         );
 
@@ -297,7 +342,7 @@ mod tests {
 
                     if part == "part1" {
                         assert_eq!(
-                            day_box.solve_part1(&input),
+                            day_object.solve_part1(&input),
                             Option::from(expected_output),
                             "{}, {} failed",
                             day_name,
@@ -305,7 +350,7 @@ mod tests {
                         );
                     } else {
                         assert_eq!(
-                            day_box.solve_part2(&input),
+                            day_object.solve_part2(&input),
                             Option::from(expected_output),
                             "{}, {} failed",
                             day_name,
