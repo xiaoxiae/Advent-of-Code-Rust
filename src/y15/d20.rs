@@ -1,17 +1,12 @@
 use crate::util::Day;
 use rayon::iter::*;
-use rayon::prelude::*;
 
-pub struct Y15D20;
+pub struct D20;
 
 fn gifts(mut number: usize, gifts: usize, reach: Option<usize>) -> usize {
     let original_number = number;
 
     let mut sum = 1;
-
-    // calculate via (1 + p1^1 + p1^2 + ...) * (1 + p2^1 + p2^2 + ...) * ...
-    // TODO: problem here is that we need to test all combinations and check for the houses after that,
-    //  this equation sadly doesn't work anymore
 
     for p in 2..(number.isqrt() + 1) {
         let mut power = 0;
@@ -45,9 +40,9 @@ fn gifts(mut number: usize, gifts: usize, reach: Option<usize>) -> usize {
     sum * gifts
 }
 
-impl Day for Y15D20 {
+impl Day for D20 {
     fn solve_part1(&self, input: &str) -> Option<String> {
-        let limit = input.parse::<usize>().unwrap();
+        let limit = input.trim().parse::<usize>().unwrap();
 
         let elf = (1usize..limit)
             .into_par_iter()
@@ -58,13 +53,21 @@ impl Day for Y15D20 {
     }
 
     fn solve_part2(&self, input: &str) -> Option<String> {
-        let limit = input.parse::<usize>().unwrap();
+        let limit = input.trim().parse::<usize>().unwrap();
+        let mut houses = vec![0; limit];
 
-        let elf = (1usize..limit)
-            .into_par_iter()
-            .find_first(|&elf| gifts(elf, 11, Option::from(50)) >= limit)
-            .unwrap();
+        for elf in 1..limit {
+            let mut i = elf;
+            while i < limit.min(elf * 50) {
+                houses[i] += 11 * elf;
+                i += elf;
+            }
 
-        Option::from(elf.to_string())
+            if houses[elf] >= limit {
+                return Option::from(elf.to_string());
+            }
+        }
+
+        panic!("No elfs found!")
     }
 }
