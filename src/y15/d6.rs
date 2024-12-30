@@ -1,4 +1,6 @@
 use crate::util::Day;
+use rayon::iter::IntoParallelIterator;
+use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
 use regex::Regex;
 
 pub struct D6;
@@ -20,13 +22,15 @@ impl Day for D6 {
                 .collect();
 
             for x in nums[0]..=nums[2] {
-                for y in nums[1]..=nums[3] {
-                    match command {
-                        "on" => grid[x][y] = true,
-                        "off" => grid[x][y] = false,
-                        "toggle" => grid[x][y] = !grid[x][y],
-                        _ => {}
+                match command {
+                    "on" => grid[x][nums[1]..=nums[3]].fill(true),
+                    "off" => grid[x][nums[1]..=nums[3]].fill(false),
+                    "toggle" => {
+                        for y in nums[1]..=nums[3] {
+                            grid[x][y] = !grid[x][y];
+                        }
                     }
+                    _ => panic!("Unknown command {}!", command),
                 }
             }
         });
@@ -56,20 +60,20 @@ impl Day for D6 {
                 .map(|n| n.parse::<usize>().unwrap())
                 .collect();
 
-            for x in nums[0]..=nums[2] {
-                for y in nums[1]..=nums[3] {
+            grid[nums[1]..=nums[3]].par_iter_mut().for_each(|v| {
+                for x in nums[0]..=nums[2] {
                     match command {
-                        "on" => grid[x][y] += 1,
+                        "on" => v[x] += 1,
                         "off" => {
-                            if grid[x][y] > 0 {
-                                grid[x][y] -= 1;
+                            if v[x] > 0 {
+                                v[x] -= 1;
                             }
                         }
-                        "toggle" => grid[x][y] += 2,
+                        "toggle" => v[x] += 2,
                         _ => {}
                     }
                 }
-            }
+            });
         });
 
         let mut total = 0;
