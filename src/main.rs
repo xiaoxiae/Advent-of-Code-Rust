@@ -87,6 +87,7 @@ use serde::Serialize;
 use std::collections::HashMap;
 use std::io::Write;
 use std::time::{Duration, Instant};
+use clap::Parser;
 
 #[derive(Serialize)]
 struct TimingResult {
@@ -102,8 +103,21 @@ fn get_length_without_colors(input: &str) -> usize {
     clean_input.len()
 }
 
+/// Simple program to greet a person
+#[derive(Parser, Debug)]
+#[command(version, about, long_about = None)]
+struct Args {
+    #[arg(short, long, default_value_t = 0)]
+    year: usize,
+
+    #[arg(short, long, default_value_t = 0)]
+    day: usize,
+}
+
 fn main() {
-    let days: Vec<(Box<dyn Day>, &str,  &str)> = days_vector!();
+    let args = Args::parse();
+
+    let days: Vec<(Box<dyn Day>, &str, &str)> = days_vector!();
 
     let mut timing_results = Vec::new();
 
@@ -118,6 +132,14 @@ fn main() {
     for (day_object, year_name, day_name) in days {
         let year = year_name[1..].parse::<usize>().unwrap();
         let day = day_name[1..].parse::<usize>().unwrap();
+
+        if args.year != 0 && args.year - 2000 != year && args.year != year {
+            continue;
+        }
+
+        if args.day != 0 && args.day != day {
+            continue;
+        }
 
         if year != last_year {
             println!(
