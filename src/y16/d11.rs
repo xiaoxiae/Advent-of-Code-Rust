@@ -1,39 +1,53 @@
 use crate::util::Day;
 use regex::Regex;
+use rustc_hash::{FxHashMap as HashMap, FxHashSet as HashSet};
 use std::cmp::Ordering;
-use std::collections::{BinaryHeap, HashMap};
+use std::collections::{BinaryHeap};
+
+const MAX_FLOOR: usize = 3;
 
 pub struct D11;
 
 #[derive(Debug, Eq, PartialEq, Clone, Hash)]
 struct Configuration {
-    elevator: isize,
+    floor: usize,
 
-    // [0] are generators, [1] are microchips
-    positions: Vec<Vec<isize>>,
+    // the integer is separated into sections of 4 bits, alternating chip/generator
+    positions: usize,
 }
 
 #[derive(Debug, Eq, PartialEq, Clone, Hash)]
 struct State {
     configuration: Configuration,
+
     steps: usize,
+    metric: isize,
 }
 
 impl Configuration {
-    fn is_end(&self) -> bool {
-        self.positions.iter().all(|row| row.iter().all(|v| *v == 3))
+    fn is_end(&self, floor_pattern: usize) -> bool {
+        self.positions == (floor_pattern << MAX_FLOOR)
     }
 
-    fn is_valid(&self) -> bool {
-        // if the state contains a chip and has j
-        for (i, chip_floor) in self.positions[1].iter().enumerate() {
-            // has generator, no need to check
-            if self.positions[0][i] == *chip_floor {
+    fn is_valid(&self, generator_pattern: usize) -> bool {
+        let mut microchip_pattern = generator_pattern >> 4;
+
+        // check all microchips
+        while microchip_pattern != 0 {
+            let element = microchip_pattern.trailing_zeros() as usize;
+
+            microchip_pattern &= !(1 << element);
+
+            let floor = (self.positions >> (element)) % 16;
+            let floor_number = floor.trailing_zeros() as usize;
+
+            // has a generator
+            if self.positions & (floor << (4 + element)) != 0 {
                 continue;
             }
 
-            // sees the wrong generator
-            if self.positions[0].contains(chip_floor) {
+            // otherwise if there is a different generator, return false
+            if self.positions & (generator_pattern << floor_number) != 0 {
                 return false;
             }
         }
@@ -41,73 +55,45 @@ impl Configuration {
         true
     }
 
-    fn populate(
-        &self,
-        configurations: &mut Vec<Configuration>,
-        current_positions: &Vec<(usize, usize)>,
-        target: usize,
-        position: (usize, usize),
-        delta: isize,
-    ) {
-        if target == current_positions.len() {
-            return;
-        }
-
-        let (t, e) = position;
-
-        if t >= self.positions.len() {
-            return;
-        }
-
-        let mut new_e = e + 1;
-        let mut new_t = t;
-        if new_e == self.positions[t].len() {
-            new_t += 1;
-            new_e = 0;
-        }
-
-        // move only items on the current floor
-        if self.elevator == self.positions[t][e]
-            && self.elevator + delta >= 0
-            && self.elevator + delta <= 3
-        // TODO: 3 is hard-coded
-        {
-            let mut new_positions = current_positions.clone();
-            new_positions.push(position);
-
-            let mut new_configuration = self.clone();
-            for p in &new_positions {
-                new_configuration.positions[p.0][p.1] += delta;
-            }
-            new_configuration.elevator += delta;
-
-            if new_configuration.is_valid() {
-                configurations.push(new_configuration);
-            }
-
-            self.populate(
-                configurations,
-                &new_positions,
-                target,
-                (new_t, new_e),
-                delta,
-            )
-        }
-
-        self.populate(
-            configurations,
-            current_positions,
-            target,
-            (new_t, new_e),
-            delta,
-        )
-    }
-
-    fn next_configurations(&self) -> Vec<Configuration> {
+    fn next_configurations(&self, floor_pattern: usize, generator_pattern: usize) -> Vec<Configuration> {
         let mut configurations = vec![];
 
-        for direction in [-1, 1] {
-            self.populate(&mut configurations, &vec![], 2, (0, 0), direction);
+        let valid_positions = self.positions & (floor_pattern << self.floor);
+
+        for d in [-1isize, 1isize] {
+            // don't go over
+            if (d == -1 && self.floor == 0) || (d == 1 && self.floor == MAX_FLOOR) {
+                continue;
+            }
+
+            let mut i_positions = valid_positions;
+            while i_positions != 0 {
+                let mut i_position = i_positions.trailing_zeros() as usize;
+
+                let mut j_positions = i_positions;
+                i_positions &= !(1 << i_position);
+
+                while j_positions != 0 {
+                    let mut j_position = j_positions.trailing_zeros() as usize;
+                    j_positions &= !(1 << j_position);
+
+                    let mut new_positions = self.positions;
+                    new_positions &= !(1 << i_position);
+                    new_positions &= !(1 << j_position);
+
+                    new_positions |= 1 << ((i_position as isize + d) as usize);
+                    new_positions |= 1 << ((j_position as isize + d) as usize);
+
+                    let configuration = Configuration {
+                        floor: (self.floor as isize + d) as usize,
+                        positions: new_positions,
+                    };
+
+                    if configuration.is_valid(generator_pattern) {
+                        configurations.push(configuration);
+                    }
+                }
+            }
         }
 
         configurations
@@ -116,7 +102,7 @@ impl Configuration {
 
 impl Ord for State {
     fn cmp(&self, other: &Self) -> Ordering {
-        other.steps.cmp(&self.steps)
+        other.metric.cmp(&self.metric)
     }
 }
 
@@ -126,33 +112,64 @@ impl PartialOrd for State {
     }
 }
 
-fn solve(start: Configuration) -> usize {
-    let mut steps: HashMap<Configuration, usize> = HashMap::default();
+fn get_floor_pattern(elements: usize) -> usize {
+    let mut pattern = 0;
+
+    for i in 0..(elements * 2) {
+        pattern |= 1 << (i * 4);
+    }
+
+    pattern
+}
+
+fn get_generator_pattern(elements: usize) -> usize {
+    let mut pattern = 0;
+
+    for i in 0..elements {
+        pattern |= 1 << (i * 8 + 4);
+    }
+
+    pattern
+}
+
+
+fn solve(start: Configuration, elements: usize) -> usize {
+    let mut distances = HashSet::default();
     let mut heap: BinaryHeap<State> = BinaryHeap::new();
 
-    steps.insert(start.clone(), 0);
+    distances.insert(start.clone());
+
     heap.push(State {
         configuration: start.clone(),
         steps: 0,
+        metric: 0,
     });
 
+    let floor_pattern = get_floor_pattern(elements);
+    let generator_pattern = get_generator_pattern(elements);
+
     while let Some(state) = heap.pop() {
-        if state.configuration.is_end() {
+        // state.configuration.pprint();
+
+        if state.configuration.is_end(floor_pattern) {
             return state.steps;
         }
 
-        for next_configuration in state.configuration.next_configurations() {
-            let best_steps = *steps.get(&next_configuration).unwrap_or(&usize::MAX);
-
-            if state.steps + 1 < best_steps {
-                let next_state = State {
-                    configuration: next_configuration.clone(),
-                    steps: state.steps + 1,
-                };
-
-                steps.insert(next_configuration, next_state.steps);
-                heap.push(next_state);
+        for next_configuration in state.configuration.next_configurations(floor_pattern, generator_pattern) {
+            if distances.contains(&next_configuration) {
+                continue;
             }
+
+            let next_distance = state.steps as isize + 1;
+
+            let next_state = State {
+                configuration: next_configuration.clone(),
+                steps: state.steps + 1,
+                metric: next_distance,
+            };
+
+            distances.insert(next_configuration);
+            heap.push(next_state);
         }
     }
 
@@ -163,36 +180,33 @@ impl Day for D11 {
     fn solve_part1(&self, input: &str) -> Option<String> {
         let re = Regex::new(r"(\b\w+\b)(?:-compatible)? (generator|microchip)").unwrap();
 
-        let mut material_count = 0;
-        let mut material_map: HashMap<String, usize> = HashMap::new();
+        let mut element_count = 0;
+        let mut element_map: HashMap<String, usize> = HashMap::default();
 
-        let mut generators: Vec<isize> = Vec::new();
-        let mut microchips: Vec<isize> = Vec::new();
+        let mut configuration: usize = 0;
 
-        for (i, line) in input.trim().lines().enumerate() {
+        for (floor, line) in input.trim().lines().enumerate() {
             for cap in re.captures_iter(line) {
-                let material_id = material_map.entry(cap[1].to_string()).or_insert_with(|| {
-                    generators.push(0);
-                    microchips.push(0);
+                let material_id = element_map.entry(cap[1].to_string()).or_insert_with(|| {
+                    element_count += 1;
 
-                    material_count = microchips.len() - 1;
-                    material_count
+                    element_count - 1
                 });
 
                 match &cap[2] {
-                    "generator" => generators[*material_id] = i as isize,
-                    "microchip" => microchips[*material_id] = i as isize,
+                    "microchip" => configuration |= 1 << (*material_id * 8 + floor),
+                    "generator" => configuration |= 1 << (*material_id * 8 + 4 + floor),
                     _ => unreachable!(),
                 }
             }
         }
 
         let state = Configuration {
-            elevator: 0,
-            positions: vec![generators, microchips],
+            floor: 0,
+            positions: configuration,
         };
 
-        let steps = solve(state);
+        let steps = solve(state, element_count);
 
         Option::from(steps.to_string())
     }
@@ -200,41 +214,38 @@ impl Day for D11 {
     fn solve_part2(&self, input: &str) -> Option<String> {
         let re = Regex::new(r"(\b\w+\b)(?:-compatible)? (generator|microchip)").unwrap();
 
-        let mut material_count = 0;
-        let mut material_map: HashMap<String, usize> = HashMap::new();
+        let mut element_count = 0;
+        let mut element_map: HashMap<String, usize> = HashMap::default();
 
-        let mut generators: Vec<isize> = Vec::new();
-        let mut microchips: Vec<isize> = Vec::new();
+        let mut configuration: usize = 0;
 
-        for (i, line) in input.trim().lines().enumerate() {
+        for (floor, line) in input.trim().lines().enumerate() {
             let mut line = line.to_string();
-            if i == 0 {
+            if floor == 0 {
                 line.push_str("An elerium generator. An elerium-compatible microchip. A dilithium generator. A dilithium-compatible microchip.")
             }
 
             for cap in re.captures_iter(&*line) {
-                let material_id = material_map.entry(cap[1].to_string()).or_insert_with(|| {
-                    generators.push(0);
-                    microchips.push(0);
+                let material_id = element_map.entry(cap[1].to_string()).or_insert_with(|| {
+                    element_count += 1;
 
-                    material_count = microchips.len() - 1;
-                    material_count
+                    element_count - 1
                 });
 
                 match &cap[2] {
-                    "generator" => generators[*material_id] = i as isize,
-                    "microchip" => microchips[*material_id] = i as isize,
+                    "microchip" => configuration |= 1 << (*material_id * 8 + floor),
+                    "generator" => configuration |= 1 << (*material_id * 8 + 4 + floor),
                     _ => unreachable!(),
                 }
             }
         }
 
         let state = Configuration {
-            elevator: 0,
-            positions: vec![generators, microchips],
+            floor: 0,
+            positions: configuration,
         };
 
-        let steps = solve(state);
+        let steps = solve(state, element_count);
 
         Option::from(steps.to_string())
     }
