@@ -1,8 +1,8 @@
 use crate::util::Day;
 use regex::Regex;
-use rustc_hash::{FxHashMap as HashMap, FxHashSet as HashSet};
+use rustc_hash::FxHashMap as HashMap;
 use std::cmp::Ordering;
-use std::collections::{BinaryHeap};
+use std::collections::BinaryHeap;
 
 const MAX_FLOOR: usize = 3;
 
@@ -21,7 +21,7 @@ struct State {
     configuration: Configuration,
 
     steps: usize,
-    metric: isize,
+    metric: usize,
 }
 
 impl Configuration {
@@ -29,9 +29,27 @@ impl Configuration {
         self.positions == (floor_pattern << MAX_FLOOR)
     }
 
-    fn is_valid(&self, generator_pattern: usize) -> bool {
-        let mut microchip_pattern = generator_pattern >> 4;
+    fn hash(&self) -> usize {
+        // while the state representation is pretty convenient, it is not compact
+        // we can compress each 4 bits into 2 bits by changing the indicator bit to value
+        let mut hash = 0;
+        let mut valid_positions = self.positions;
 
+        while valid_positions != 0 {
+            let floor = valid_positions.trailing_zeros() as usize;
+
+            hash |= floor;
+
+            hash <<= 2;
+            valid_positions >>= 4;
+        }
+
+        hash |= self.floor;
+
+        hash
+    }
+
+    fn is_valid(&self, mut microchip_pattern: usize, generator_pattern: usize) -> bool {
         // check all microchips
         while microchip_pattern != 0 {
             let element = microchip_pattern.trailing_zeros() as usize;
@@ -55,9 +73,24 @@ impl Configuration {
         true
     }
 
+    fn steps_to_end(&self) -> usize {
+        let mut valid_positions = self.positions;
+        let mut steps: usize = 0;
+
+        while valid_positions != 0 {
+            let floor = valid_positions.trailing_zeros() as usize;
+
+            steps += MAX_FLOOR - floor;
+            valid_positions >>= 4;
+        }
+
+        steps * 2
+    }
+
     fn next_configurations(&self, floor_pattern: usize, generator_pattern: usize) -> Vec<Configuration> {
         let mut configurations = vec![];
 
+        // only move things on the floor that we're on
         let valid_positions = self.positions & (floor_pattern << self.floor);
 
         for d in [-1isize, 1isize] {
@@ -84,12 +117,20 @@ impl Configuration {
                     new_positions |= 1 << ((i_position as isize + d) as usize);
                     new_positions |= 1 << ((j_position as isize + d) as usize);
 
+                    let new_floor = (self.floor as isize + d) as usize;
+
                     let configuration = Configuration {
-                        floor: (self.floor as isize + d) as usize,
+                        floor: new_floor,
                         positions: new_positions,
                     };
 
-                    if configuration.is_valid(generator_pattern) {
+                    let mut microchip_pattern = generator_pattern >> 4;
+
+                    // get microchips from the two floors that are being changed
+                    let microchip_pattern = (new_positions & (microchip_pattern << self.floor)) >> self.floor
+                        | (new_positions & (microchip_pattern << new_floor)) >> new_floor;
+
+                    if configuration.is_valid(microchip_pattern, generator_pattern) {
                         configurations.push(configuration);
                     }
                 }
@@ -134,41 +175,37 @@ fn get_generator_pattern(elements: usize) -> usize {
 
 
 fn solve(start: Configuration, elements: usize) -> usize {
-    let mut distances = HashSet::default();
+    let mut explored = vec![false; 2usize.pow((elements * 2 * 2) as u32 + 2)];
     let mut heap: BinaryHeap<State> = BinaryHeap::new();
 
-    distances.insert(start.clone());
+    explored[start.hash()] = true;
 
     heap.push(State {
         configuration: start.clone(),
         steps: 0,
-        metric: 0,
+        metric: start.steps_to_end(),
     });
 
     let floor_pattern = get_floor_pattern(elements);
     let generator_pattern = get_generator_pattern(elements);
 
     while let Some(state) = heap.pop() {
-        // state.configuration.pprint();
-
         if state.configuration.is_end(floor_pattern) {
             return state.steps;
         }
 
         for next_configuration in state.configuration.next_configurations(floor_pattern, generator_pattern) {
-            if distances.contains(&next_configuration) {
+            if explored[next_configuration.hash()] {
                 continue;
             }
-
-            let next_distance = state.steps as isize + 1;
 
             let next_state = State {
                 configuration: next_configuration.clone(),
                 steps: state.steps + 1,
-                metric: next_distance,
+                metric: state.steps + 1 + next_configuration.steps_to_end(),
             };
 
-            distances.insert(next_configuration);
+            explored[next_configuration.hash()] = true;
             heap.push(next_state);
         }
     }
