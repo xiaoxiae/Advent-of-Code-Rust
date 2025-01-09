@@ -99,6 +99,11 @@ impl Configuration {
                 continue;
             }
 
+            // pairs of things
+            // if we ever move a pair of microchip-reactor, do not move another,
+            // as the pairs are interchangeable
+            let mut moved_pair = false;
+
             let mut i_positions = valid_positions;
             while i_positions != 0 {
                 let mut i_position = i_positions.trailing_zeros() as usize;
@@ -109,6 +114,12 @@ impl Configuration {
                 while j_positions != 0 {
                     let mut j_position = j_positions.trailing_zeros() as usize;
                     j_positions &= !(1 << j_position);
+
+                    let is_pair = (i_position != j_position) && (i_position / 8 == j_position / 8);
+
+                    if moved_pair && is_pair {
+                        break;
+                    }
 
                     let mut new_positions = self.positions;
                     new_positions &= !(1 << i_position);
@@ -132,6 +143,10 @@ impl Configuration {
 
                     if configuration.is_valid(microchip_pattern, generator_pattern) {
                         configurations.push(configuration);
+
+                        if is_pair {
+                            moved_pair = true;
+                        }
                     }
                 }
             }
