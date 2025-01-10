@@ -106,13 +106,13 @@ impl Configuration {
 
             let mut i_positions = valid_positions;
             while i_positions != 0 {
-                let mut i_position = i_positions.trailing_zeros() as usize;
+                let i_position = i_positions.trailing_zeros() as usize;
 
                 let mut j_positions = i_positions;
                 i_positions &= !(1 << i_position);
 
                 while j_positions != 0 {
-                    let mut j_position = j_positions.trailing_zeros() as usize;
+                    let j_position = j_positions.trailing_zeros() as usize;
                     j_positions &= !(1 << j_position);
 
                     let is_pair = (i_position != j_position) && (i_position / 8 == j_position / 8);
@@ -135,7 +135,7 @@ impl Configuration {
                         positions: new_positions,
                     };
 
-                    let mut microchip_pattern = generator_pattern >> 4;
+                    let microchip_pattern = generator_pattern >> 4;
 
                     // get microchips from the two floors that are being changed
                     let microchip_pattern = (new_positions & (microchip_pattern << self.floor)) >> self.floor

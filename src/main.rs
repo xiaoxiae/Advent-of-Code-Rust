@@ -1,3 +1,5 @@
+#![feature(portable_simd)]
+
 mod util;
 
 // Define a macro to declare days for multiple years.

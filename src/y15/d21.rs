@@ -30,7 +30,7 @@ impl Unit {
 
 #[derive(Debug, Clone)]
 struct Item {
-    name: &'static str,
+    _name: &'static str,
     cost: isize,
     damage: isize,
     armor: isize,
@@ -39,7 +39,7 @@ struct Item {
 impl Item {
     fn new(name: &'static str, cost: isize, damage: isize, armor: isize) -> Self {
         Self {
-            name,
+            _name: name,
             cost,
             damage,
             armor,

@@ -18,7 +18,7 @@ impl Day for D4 {
                 *freq.entry(c).or_insert(0) += 1;
             }
 
-            let mut encrypted_letters: Vec<char> = freq.iter()
+            let encrypted_letters: Vec<char> = freq.iter()
                 .sorted_by(|&(a_key, a_val), &(b_key, b_val)| {
                     b_val.cmp(a_val).then_with(|| a_key.cmp(b_key))
                 })

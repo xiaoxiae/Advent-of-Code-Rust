@@ -1,5 +1,4 @@
 use crate::util::Day;
-use rayon::iter::IntoParallelIterator;
 use rayon::iter::{IntoParallelRefMutIterator, ParallelIterator};
 use regex::Regex;
 

@@ -14,7 +14,6 @@ fn solve(input: &str) -> (usize, usize) {
     let mut storage: HashMap<Destination, Vec<usize>> = HashMap::new();
 
     let mut part1 = 0;
-    let mut part2 = 1;
 
     for line in input.trim().lines() {
         if line.starts_with("value") {
@@ -87,7 +86,7 @@ fn solve(input: &str) -> (usize, usize) {
         storage.entry(hi.clone()).or_insert(vec![]).push(max);
     }
 
-    part2 = 1;
+    let mut part2 = 1;
     for i in 0..3 {
         part2 *= storage.get(&(String::from("output"), i)).unwrap()[0]
     }

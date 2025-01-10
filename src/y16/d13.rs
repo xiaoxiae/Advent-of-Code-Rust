@@ -1,7 +1,6 @@
-use std::cmp::Ordering;
-use std::collections::{BinaryHeap, HashMap, HashSet};
-use itertools::Itertools;
 use crate::util::Day;
+use std::cmp::Ordering;
+use std::collections::{BinaryHeap, HashSet};
 
 pub struct D13;
 
@@ -56,7 +55,7 @@ impl PartialOrd for State {
 
 impl Day for D13 {
     fn solve_part1(&self, input: &str) -> Option<String> {
-        let favorite_number = input.parse::<usize>().unwrap();
+        let favorite_number = input.trim().parse::<usize>().unwrap();
 
         let mut explored: HashSet<Position> = HashSet::new();
         let mut heap: BinaryHeap<State> = BinaryHeap::new();
@@ -105,7 +104,7 @@ impl Day for D13 {
     }
 
     fn solve_part2(&self, input: &str) -> Option<String> {
-        let favorite_number = input.parse::<usize>().unwrap();
+        let favorite_number = input.trim().parse::<usize>().unwrap();
 
         let mut explored: HashSet<Position> = HashSet::new();
         let mut heap: BinaryHeap<State> = BinaryHeap::new();
