@@ -46,7 +46,7 @@ fn solve(disks: Vec<(i64, i64)>) -> usize {
     // t == -a'_2 (mod n_2)
     // ...
     //
-    // TODO: https://en.wikipedia.org/wiki/Chinese_remainder_theorem#Existence_(constructive_proof)
+    // then use https://en.wikipedia.org/wiki/Chinese_remainder_theorem#Existence_(constructive_proof)
 
     let mut n_1 = 1;
     let mut a_1 = 0;
