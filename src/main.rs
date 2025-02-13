@@ -71,7 +71,8 @@ define_years!(
         d11 => D11,
         d12 => D12,
         d13 => D13,
-        d15 => D15
+        d15 => D15,
+        d16 => D16
     },
     y22 => {
         d1 => D1,
@@ -273,7 +274,7 @@ fn main() {
                             result,
                             format!("{:.2?}", Duration::from_secs_f64(*seconds))
                         )
-                        .bright_black(),
+                            .bright_black(),
                     );
                 } else {
                     let time_string = format!("{:.2?}", Duration::from_secs_f64(*seconds));
@@ -309,14 +310,14 @@ fn main() {
         sorted_keys.sort();
 
         for key in sorted_keys {
-             if let Some(&(count, total)) = year_times.get(&key) {
-                 println!(
-                     "20{}: {} ({})",
-                     key,
-                     format!("{}", count).bright_yellow().bold(),
-                     format!("{:.2?}", Duration::from_secs_f64(total)).yellow()
-                 );
-             }
+            if let Some(&(count, total)) = year_times.get(&key) {
+                println!(
+                    "20{}: {} ({})",
+                    key,
+                    format!("{}", count).bright_yellow().bold(),
+                    format!("{:.2?}", Duration::from_secs_f64(total)).yellow()
+                );
+            }
         }
 
         let out = format!(
