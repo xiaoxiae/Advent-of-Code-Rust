@@ -69,7 +69,7 @@ fn solve(instructions: &Vec<Instruction>, registers: &mut Vec<usize>) {
                     continue;
                 }
             }
-            Instruction::Nop => panic!(),
+            Instruction::Nop => {}
         }
 
         ip += 1;
