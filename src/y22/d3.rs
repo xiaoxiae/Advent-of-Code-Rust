@@ -1,5 +1,4 @@
 use crate::util::Day;
-use itertools::Itertools;
 use std::collections::HashSet;
 
 pub struct D3;

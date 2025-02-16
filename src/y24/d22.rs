@@ -1,11 +1,9 @@
 use crate::util::Day;
-use rayon::iter::IntoParallelIterator;
 use rayon::iter::ParallelIterator;
-use rayon::prelude::{ParallelSlice, ParallelString};
+use rayon::prelude::ParallelString;
 use rustc_hash::{FxBuildHasher, FxHashMap as HashMap};
 use std::simd::num::SimdUint;
 use std::simd::Simd;
-use itertools::Itertools;
 
 pub struct D22;
 
