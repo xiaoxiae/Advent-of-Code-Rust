@@ -58,8 +58,6 @@ fn parse(input: &str) -> Vec<Instruction> {
 fn solve(instructions: &mut Vec<Instruction>, registers: &mut Vec<isize>) {
     let mut ip: usize = 0;
 
-    let mut last_b = 0;
-
     while ip < instructions.len() {
         match &instructions[ip] {
             Instruction::Copy(r_from, r_to) => {

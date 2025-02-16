@@ -1,5 +1,4 @@
 use crate::util::Day;
-use itertools::Itertools;
 
 pub struct D16;
 
