@@ -22,22 +22,16 @@ impl Day for D17 {
         let steps = input.trim().parse::<usize>().unwrap();
         let insertions = 50_000_000;
 
-        let mut zero_position = 0;
         let mut after_zero = 1;
-
         let mut position = 1;
 
+        // we make 0 the center of the list
         for size in 2..insertions {
-            position = (position + steps) % size;
+            position = (position + steps) % size + 1;
 
-            // hit zero -- insert after it
-            if position == zero_position {
+            if position == 1 {
                 after_zero = size;
-            } else if position < zero_position {
-                zero_position += 1;
             }
-
-            position += 1;
         }
 
         Option::from(after_zero.to_string())
