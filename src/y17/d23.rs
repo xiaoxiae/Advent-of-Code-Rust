@@ -64,67 +64,67 @@ fn is_composite(i: isize) -> bool {
     false
 }
 
-fn fast() -> usize {
-    let mut a: usize;
-    let mut b: usize;
-    let mut c: usize;
-    let mut d: usize;
-    let mut e: usize;
-    let mut f: usize;
-    let mut h: usize = 0;
-
-    // (my inputs)
-    a = 1;
-    b = 57 * 100 + 100000;
-    c = b + 17000;
-
-    loop {
-        f = 1;
-        d = 2;
-
-        // this is just double for-loop over d and e
-        // which checks if b is composite...
-        'outer: loop {
-            e = 2;
-
-            loop {
-                if b == d * e {
-                    f = 0;
-                    break 'outer;
-                }
-
-                e += 1;
-
-                if b == e {
-                    break;
-                }
-            }
-
-            if b == d {
-                break;
-            }
-
-            d += 1;
-        }
-
-        // ... and we count them
-        if f == 0 {
-            h += 1;
-        }
-
-        if b == c {
-            break;
-        }
-
-        b += 17;
-    }
-
-    h
-}
+// fn decompiled() -> usize {
+//     let mut a: usize;
+//     let mut b: usize;
+//     let mut c: usize;
+//     let mut d: usize;
+//     let mut e: usize;
+//     let mut f: usize;
+//     let mut h: usize = 0;
+// 
+//     // (my inputs)
+//     a = 1;
+//     b = 57 * 100 + 100000;
+//     c = b + 17000;
+// 
+//     loop {
+//         f = 1;
+//         d = 2;
+// 
+//         // this is just double for-loop over d and e
+//         // which checks if b is composite...
+//         'outer: loop {
+//             e = 2;
+// 
+//             loop {
+//                 if b == d * e {
+//                     f = 0;
+//                     break 'outer;
+//                 }
+// 
+//                 e += 1;
+// 
+//                 if b == e {
+//                     break;
+//                 }
+//             }
+// 
+//             if b == d {
+//                 break;
+//             }
+// 
+//             d += 1;
+//         }
+// 
+//         // ... and we count them
+//         if f == 0 {
+//             h += 1;
+//         }
+// 
+//         if b == c {
+//             break;
+//         }
+// 
+//         b += 17;
+//     }
+// 
+//     h
+// }
 
 impl Day for D23 {
     fn solve_part1(&self, input: &str) -> Option<String> {
-        let mut instructions = parse_instructions(input);
+        let instructions = parse_instructions(input);
 
         let mut registers = vec![0isize; 8];
         let mut ip: isize = 0;
@@ -159,7 +159,7 @@ impl Day for D23 {
     }
 
     fn solve_part2(&self, input: &str) -> Option<String> {
-        let mut instructions = parse_instructions(input);
+        let instructions = parse_instructions(input);
 
         let mut registers = vec![0isize; 8];
         registers[0] = 1;

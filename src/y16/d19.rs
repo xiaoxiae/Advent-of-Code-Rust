@@ -25,7 +25,7 @@ impl Day for D19 {
     }
 
     fn solve_part2(&self, input: &str) -> Option<String> {
-        let mut i = input.trim().parse::<usize>().unwrap();
+        let i = input.trim().parse::<usize>().unwrap();
 
         // printed out and reverse-engineered the pattern
         // can't explain this shit

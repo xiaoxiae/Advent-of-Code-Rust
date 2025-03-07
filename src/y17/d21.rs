@@ -109,7 +109,7 @@ fn solve(input: &str, iterations: usize) -> usize {
     let mut map = vec![vec![false; width]; width];
     to_map(parse_pattern(".#./..#/###"), width, &mut map, 0, 0);
 
-    for iteration in 0..iterations {
+    for _ in 0..iterations {
         let size = match width % 2 {
             0 => 2,
             _ => 3,

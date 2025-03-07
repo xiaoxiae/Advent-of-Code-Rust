@@ -1,7 +1,6 @@
 use crate::util::Day;
 use crate::y17::d22::NodeState::{Clean, Flagged, Infected, Weakened};
 use rustc_hash::{FxHashMap as HashMap, FxHashSet as HashSet};
-use std::io::BufRead;
 
 pub struct D22;
 

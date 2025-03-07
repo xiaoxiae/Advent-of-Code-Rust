@@ -1,5 +1,3 @@
-use std::ptr::replace;
-use rayon::join;
 use crate::util::Day;
 
 pub struct D15;

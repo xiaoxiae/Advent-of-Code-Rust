@@ -2,7 +2,7 @@ use crate::util::Day;
 
 pub struct D16;
 
-fn get_dragon_curve(mut initial: &Vec<bool>, disk_size: usize) -> Vec<bool> {
+fn get_dragon_curve(initial: &Vec<bool>, disk_size: usize) -> Vec<bool> {
     let mut initial = initial.clone();
 
     while initial.len() < disk_size {

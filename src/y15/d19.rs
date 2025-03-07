@@ -1,5 +1,5 @@
 use crate::util::Day;
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashSet};
 
 pub struct D19;
 
@@ -36,32 +36,32 @@ fn parse(input: &str) -> (Vec<(String, String)>, String) {
 }
 
 
-fn devolve(molecule: String, replacements: &Vec<(String, String)>, cache: &mut HashMap<String, usize>) -> usize {
-    if molecule == "e" {
-        return 0;
-    }
-
-    if cache.contains_key(&molecule) {
-        return cache[&molecule];
-    }
-
-    let mut min_depth = usize::MAX;
-    for neighbour in neighbours(&molecule, &replacements) {
-        let result = devolve(neighbour, &replacements, cache);
-
-        // looking through the input, it looks pretty linear so we just assume it's unique
-        if result != usize::MAX {
-            min_depth = 1 + min_depth.min(result);
-            break;
-        }
-    }
-
-    if min_depth != usize::MAX {
-        cache.insert(molecule, min_depth);
-    }
-
-    min_depth
-}
+// fn devolve(molecule: String, replacements: &Vec<(String, String)>, cache: &mut HashMap<String, usize>) -> usize {
+//     if molecule == "e" {
+//         return 0;
+//     }
+//
+//     if cache.contains_key(&molecule) {
+//         return cache[&molecule];
+//     }
+//
+//     let mut min_depth = usize::MAX;
+//     for neighbour in neighbours(&molecule, &replacements) {
+//         let result = devolve(neighbour, &replacements, cache);
+//
+//         // looking through the input, it looks pretty linear so we just assume it's unique
+//         if result != usize::MAX {
+//             min_depth = 1 + min_depth.min(result);
+//             break;
+//         }
+//     }
+//
+//     if min_depth != usize::MAX {
+//         cache.insert(molecule, min_depth);
+//     }
+//
+//     min_depth
+// }
 
 
 impl Day for D19 {
@@ -73,7 +73,7 @@ impl Day for D19 {
         Option::from(molecules.len().to_string())
     }
 
-    fn solve_part2(&self, input: &str) -> Option<String> {
+    fn solve_part2(&self, _: &str) -> Option<String> {
         None
 
         // TODO: this sometimes go into an infinite loop -- fix me!

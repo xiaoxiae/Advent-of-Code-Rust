@@ -105,7 +105,7 @@ fn run(
 
 impl Day for D18 {
     fn solve_part1(&self, input: &str) -> Option<String> {
-        let mut instructions = parse_instructions(input);
+        let instructions = parse_instructions(input);
 
         let mut registers = vec![0isize; 26];
         let mut last_sound = None;
@@ -147,7 +147,7 @@ impl Day for D18 {
     }
 
     fn solve_part2(&self, input: &str) -> Option<String> {
-        let mut instructions = parse_instructions(input);
+        let instructions = parse_instructions(input);
 
         let mut q1 = VecDeque::new();
         let mut ip1 = 0;

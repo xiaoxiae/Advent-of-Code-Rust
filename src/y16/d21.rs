@@ -84,7 +84,7 @@ impl Command {
                 //       o
                 // o      .
 
-                let mut n = password.iter().position(|&x| x == c).unwrap();
+                let n = password.iter().position(|&x| x == c).unwrap();
 
                 let command = if n % 2 == 1 {
                     match n {

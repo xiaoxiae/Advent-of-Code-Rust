@@ -38,7 +38,7 @@ impl Day for D20 {
         let mut closest = i64::MAX;
         let mut closest_i = 0;
 
-        for (i, mut particle) in particles.iter_mut().enumerate() {
+        for (i, particle) in particles.iter_mut().enumerate() {
             for j in 0..particle.acceleration.len() {
                 particle.velocity[j] += n * particle.acceleration[j];
                 particle.position[j] +=

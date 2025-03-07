@@ -76,7 +76,7 @@ fn parse(input: &str) -> Vec<(usize, usize)> {
 
 impl Day for D24 {
     fn solve_part1(&self, input: &str) -> Option<String> {
-        let mut bridges = parse(input);
+        let bridges = parse(input);
 
         Option::from(get_strong(&bridges, 0, 0).to_string())
     }
