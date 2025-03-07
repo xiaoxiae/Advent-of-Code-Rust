@@ -1,5 +1,6 @@
 use crate::util::Day;
-use std::collections::{HashSet};
+use std::collections::{HashMap, HashSet};
+use itertools::Itertools;
 
 pub struct D19;
 
@@ -19,7 +20,7 @@ fn neighbours(molecule: &String, replacements: &Vec<(String, String)>) -> Vec<St
         }
     }
 
-    molecules.into_iter().collect()
+    molecules.into_iter().sorted_by_key(|k| k.len()).collect()
 }
 
 fn parse(input: &str) -> (Vec<(String, String)>, String) {
@@ -36,32 +37,32 @@ fn parse(input: &str) -> (Vec<(String, String)>, String) {
 }
 
 
-// fn devolve(molecule: String, replacements: &Vec<(String, String)>, cache: &mut HashMap<String, usize>) -> usize {
-//     if molecule == "e" {
-//         return 0;
-//     }
-//
-//     if cache.contains_key(&molecule) {
-//         return cache[&molecule];
-//     }
-//
-//     let mut min_depth = usize::MAX;
-//     for neighbour in neighbours(&molecule, &replacements) {
-//         let result = devolve(neighbour, &replacements, cache);
-//
-//         // looking through the input, it looks pretty linear so we just assume it's unique
-//         if result != usize::MAX {
-//             min_depth = 1 + min_depth.min(result);
-//             break;
-//         }
-//     }
-//
-//     if min_depth != usize::MAX {
-//         cache.insert(molecule, min_depth);
-//     }
-//
-//     min_depth
-// }
+fn devolve(molecule: String, replacements: &Vec<(String, String)>, cache: &mut HashMap<String, usize>) -> usize {
+    if molecule == "e" {
+        return 0;
+    }
+
+    if cache.contains_key(&molecule) {
+        return cache[&molecule];
+    }
+
+    let mut min_depth = usize::MAX;
+    for neighbour in neighbours(&molecule, &replacements) {
+        let result = devolve(neighbour, &replacements, cache);
+
+        // looking through the input, it looks pretty linear so we just assume it's unique
+        if result != usize::MAX {
+            min_depth = 1 + min_depth.min(result);
+            break;
+        }
+    }
+
+    if min_depth != usize::MAX {
+        cache.insert(molecule, min_depth);
+    }
+
+    min_depth
+}
 
 
 impl Day for D19 {
@@ -73,22 +74,18 @@ impl Day for D19 {
         Option::from(molecules.len().to_string())
     }
 
-    fn solve_part2(&self, _: &str) -> Option<String> {
-        None
+    fn solve_part2(&self, input: &str) -> Option<String> {
+        let (replacements, molecule) = parse(input);
 
-        // TODO: this sometimes go into an infinite loop -- fix me!
+        let mut inverse_replacements: Vec<(String, String)> = vec![];
+        for (from, to) in &replacements {
+            inverse_replacements.push((to.to_string(), from.to_string()));
+        }
 
-        // let (replacements, molecule) = parse(input);
+        let mut cache = HashMap::new();
 
-        // let mut inverse_replacements: Vec<(String, String)> = vec![];
-        // for (from, to) in &replacements {
-        //     inverse_replacements.push((to.to_string(), from.to_string()));
-        // }
+        let distance: usize = devolve(molecule, &inverse_replacements, &mut cache);
 
-        // let mut cache = HashMap::new();
-
-        // let distance: usize = devolve(molecule, &inverse_replacements, &mut cache);
-
-        // Option::from(distance.to_string())
+        Option::from(distance.to_string())
     }
 }
