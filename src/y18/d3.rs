@@ -1,7 +1,5 @@
 use crate::util::Day;
-use itertools::Itertools;
 use regex::Regex;
-use std::collections::HashMap;
 
 pub struct D3;
 

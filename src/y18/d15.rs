@@ -1,5 +1,4 @@
 use crate::util::Day;
-use itertools::Itertools;
 use rustc_hash::{FxHashMap as HashMap, FxHashSet as HashSet};
 use std::collections::VecDeque;
 
@@ -14,22 +13,6 @@ enum Tile {
     },
     Wall,
     Empty,
-}
-
-fn print_map(map: &Vec<Vec<Tile>>) {
-    for row in map {
-        let line: String = row
-            .iter()
-            .map(|tile| match tile {
-                Tile::Unit { good: true, .. } => 'G',
-                Tile::Unit { good: false, .. } => 'E',
-                Tile::Wall => '#',
-                Tile::Empty => '.',
-            })
-            .collect();
-
-        println!("{}", line);
-    }
 }
 
 fn find_lowest_health_target(
@@ -123,7 +106,7 @@ fn find_closest_target_direction(
     visited.insert(start, start);
 
     while !queue.is_empty() {
-        let (mut x, mut y) = queue.pop_front().unwrap();
+        let (x, y) = queue.pop_front().unwrap();
 
         for (dx, dy) in [(0, -1), (-1, 0), (1, 0), (0, 1)] {
             let mut nx = x + dx;

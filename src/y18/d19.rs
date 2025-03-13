@@ -177,7 +177,7 @@ fn sum_of_divisors(mut n: usize) -> usize {
     }
 
     if n > 1 {
-        sum *= (1 + n);
+        sum *= 1 + n;
     }
 
     sum

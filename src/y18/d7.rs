@@ -1,6 +1,5 @@
 use crate::util::Day;
-use itertools::Itertools;
-use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::collections::{BinaryHeap, HashMap};
 use std::cmp::Reverse;
 
 pub struct D7;
