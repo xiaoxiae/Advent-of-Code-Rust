@@ -69,17 +69,20 @@ define_years!(
         d11 => D11, d12 => D12, d13 => D13, d14 => D14, d15 => D15,
         d16 => D16, d17 => D17, d18 => D18, d19 => D19, d20 => D20,
         d21 => D21, d22 => D22, d23 => D23, d24 => D24, d25 => D25
+    },
+    y25 => {
+        d1 => D1, d2 => D2
     }
 );
 
 use crate::util::Day;
+use clap::Parser;
 use colored::Colorize;
 use regex::Regex;
 use serde::Serialize;
 use std::collections::HashMap;
 use std::io::Write;
 use std::time::{Duration, Instant};
-use clap::Parser;
 
 #[derive(Serialize)]
 struct TimingResult {
