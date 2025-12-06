@@ -71,7 +71,8 @@ define_years!(
         d21 => D21, d22 => D22, d23 => D23, d24 => D24, d25 => D25
     },
     y25 => {
-        d1 => D1, d2 => D2, d3 => D3, d4 => D4
+        d1 => D1, d2 => D2, d3 => D3, d4 => D4, d5 => D5,
+        d6 => D6
     }
 );
 
@@ -197,7 +198,7 @@ fn main() {
             year_times
                 .entry(year)
                 .and_modify(|(count, time)| {
-                    *count += day_stars.min(2);  // no part 3s
+                    *count += day_stars.min(2); // no part 3s
                     *time += results
                         .times
                         .values()
@@ -206,7 +207,7 @@ fn main() {
                         .sum::<f64>();
                 })
                 .or_insert((
-                    day_stars.min(2),  // no part 3s
+                    day_stars.min(2), // no part 3s
                     results
                         .times
                         .values()
@@ -238,7 +239,7 @@ fn main() {
                             result,
                             format!("{:.2?}", Duration::from_secs_f64(*seconds))
                         )
-                            .bright_black(),
+                        .bright_black(),
                     );
                 } else {
                     let time_string = format!("{:.2?}", Duration::from_secs_f64(*seconds));
